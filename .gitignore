@@ -1,0 +1,22 @@
+## Maven ##
+/target/
+
+## Eclipse ##
+/.classpath
+/.project
+/.settings/
+
+## vim ##
+*.swp
+
+## Interactive tests ##
+/samples/
+
+## StarDist models ##
+/models/
+
+## MacOSX
+.DS_Store
+
+## SciJava release tools
+pom.xml.releaseBackup
