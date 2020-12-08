@@ -31,7 +31,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.JLabelLogger;
@@ -221,26 +220,26 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		/*
 		 * Preview.
 		 */
-				
-						final JLabel lblScoreTreshold = new JLabel( "Treshold on probability:" );
-						lblScoreTreshold.setFont( SMALL_FONT );
-						final GridBagConstraints gbc_lblScoreTreshold = new GridBagConstraints();
-						gbc_lblScoreTreshold.anchor = GridBagConstraints.EAST;
-						gbc_lblScoreTreshold.insets = new Insets( 5, 5, 5, 5 );
-						gbc_lblScoreTreshold.gridx = 0;
-						gbc_lblScoreTreshold.gridy = 7;
-						add( lblScoreTreshold, gbc_lblScoreTreshold );
-		
-				ftfProbaThreshold = new JFormattedTextField( THRESHOLD_FORMAT );
-				ftfProbaThreshold.setFont( FONT );
-				ftfProbaThreshold.setMinimumSize( new Dimension( 60, 26 ) );
-				ftfProbaThreshold.setHorizontalAlignment( SwingConstants.CENTER );
-				final GridBagConstraints gbc_score = new GridBagConstraints();
-				gbc_score.fill = GridBagConstraints.HORIZONTAL;
-				gbc_score.insets = new Insets(5, 5, 5, 5);
-				gbc_score.gridx = 1;
-				gbc_score.gridy = 7;
-				add( ftfProbaThreshold, gbc_score );
+
+		final JLabel lblScoreTreshold = new JLabel( "Treshold on probability:" );
+		lblScoreTreshold.setFont( SMALL_FONT );
+		final GridBagConstraints gbc_lblScoreTreshold = new GridBagConstraints();
+		gbc_lblScoreTreshold.anchor = GridBagConstraints.EAST;
+		gbc_lblScoreTreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbc_lblScoreTreshold.gridx = 0;
+		gbc_lblScoreTreshold.gridy = 7;
+		add( lblScoreTreshold, gbc_lblScoreTreshold );
+
+		ftfProbaThreshold = new JFormattedTextField( THRESHOLD_FORMAT );
+		ftfProbaThreshold.setFont( FONT );
+		ftfProbaThreshold.setMinimumSize( new Dimension( 60, 26 ) );
+		ftfProbaThreshold.setHorizontalAlignment( SwingConstants.CENTER );
+		final GridBagConstraints gbc_score = new GridBagConstraints();
+		gbc_score.fill = GridBagConstraints.HORIZONTAL;
+		gbc_score.insets = new Insets( 5, 5, 5, 5 );
+		gbc_score.gridx = 1;
+		gbc_score.gridy = 7;
+		add( ftfProbaThreshold, gbc_score );
 
 		btnPreview = new JButton( "Preview", ICON_PREVIEW );
 		btnPreview.setFont( FONT );
@@ -335,7 +334,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	@Override
 	@SuppressWarnings( "rawtypes" )
-	protected SpotDetectorFactory< ? > getDetectorFactory()
+	protected IlastikDetectorFactory< ? > getDetectorFactory()
 	{
 		return new IlastikDetectorFactory();
 	}

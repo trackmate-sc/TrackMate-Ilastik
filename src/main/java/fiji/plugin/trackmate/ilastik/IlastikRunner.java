@@ -15,6 +15,7 @@ import org.scijava.log.LogService;
 import org.scijava.options.OptionsService;
 
 import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.SpotRoi;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
@@ -36,6 +37,7 @@ import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 public class IlastikRunner
@@ -67,7 +69,7 @@ public class IlastikRunner
 	 * @throws IOException
 	 *             if the Ilastik file cannot be found.
 	 */
-	public static < T extends RealType< T > & NativeType< T > > List< Spot > run(
+	public static < T extends RealType< T > & NativeType< T > > SpotCollection run(
 			final ImgPlus< T > input,
 			final Interval interval,
 			final double[] calibration,
@@ -84,6 +86,8 @@ public class IlastikRunner
 		 * Properly set the image to process: crop it.
 		 */
 
+		System.out.println( "Input: " + Util.printInterval( input ) ); // DEBUG
+		System.out.println( "Interval: " + Util.printInterval( interval ) ); // DEBUG
 		final RandomAccessibleInterval< T > crop = Views.interval( input, interval );
 		final RandomAccessibleInterval< T > zeroMinCrop = Views.zeroMin( crop );
 
@@ -120,30 +124,38 @@ public class IlastikRunner
 		 * Create ROIs from proba.
 		 */
 
-		final ImagePlus probaImp = ImageJFunctions.wrap( proba, "Class " + classId + " proba" );
-		final Converter< T, BitType > thresholder = ( r, b ) -> b.set( r.getRealDouble() > probaThreshold );
-		final RandomAccessibleInterval< BitType > mask = Converters.convertRAI( proba, thresholder, new BitType() );
-		final List< Polygon > polygons = maskToPolygons( mask );
-		final List< Spot > spots = new ArrayList<>( polygons.size() );
-		for ( final Polygon polygon : polygons )
+		final SpotCollection spots = new SpotCollection();
+		final int timeIndex = proba.dimensionIndex( Axes.TIME );
+		final int t0 = ( int ) interval.min( 2 );
+		for ( int t = 0; t < proba.dimension( timeIndex ); t++ )
 		{
-			final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
-
-			// Measure quality.
-			probaImp.setRoi( roi );
-			final double quality = probaImp.getStatistics( Measurements.MIN_MAX ).max;
-
-			// Create Spot ROI.
-			final PolygonRoi fRoi = simplify( roi, smoothInterval, epsilon );
-			final Polygon fPolygon = fRoi.getPolygon();
-			final double[] xpoly = new double[ fPolygon.npoints ];
-			final double[] ypoly = new double[ fPolygon.npoints ];
-			for ( int i = 0; i < fPolygon.npoints; i++ )
+			final ImgPlus< T > probaThisFrame = ImgPlusViews.hyperSlice( proba, timeIndex, t );
+			final ImagePlus probaImp = ImageJFunctions.wrap( probaThisFrame, "Class " + classId + " proba" );
+			final Converter< T, BitType > thresholder = ( r, b ) -> b.set( r.getRealDouble() > probaThreshold );
+			final RandomAccessibleInterval< BitType > mask = Converters.convertRAI( probaThisFrame, thresholder, new BitType() );
+			final List< Polygon > polygons = maskToPolygons( mask );
+			final List< Spot > spotsThisFrame = new ArrayList<>( polygons.size() );
+			for ( final Polygon polygon : polygons )
 			{
-				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] );
-				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] );
+				final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
+
+				// Measure quality.
+				probaImp.setRoi( roi );
+				final double quality = probaImp.getStatistics( Measurements.MIN_MAX ).max;
+
+				// Create Spot ROI.
+				final PolygonRoi fRoi = simplify( roi, smoothInterval, epsilon );
+				final Polygon fPolygon = fRoi.getPolygon();
+				final double[] xpoly = new double[ fPolygon.npoints ];
+				final double[] ypoly = new double[ fPolygon.npoints ];
+				for ( int i = 0; i < fPolygon.npoints; i++ )
+				{
+					xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] );
+					ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] );
+				}
+				spotsThisFrame.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
 			}
-			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
+			spots.put( t + t0, spotsThisFrame );
 		}
 		return spots;
 	}

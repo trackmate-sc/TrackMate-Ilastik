@@ -13,7 +13,6 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.TrackMate;
-import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.TrackMateGUIController;
 
@@ -36,7 +35,7 @@ public abstract class IlastikDetectorBaseConfigurationPanel extends Configuratio
 		this.model = model;
 	}
 
-	protected abstract SpotDetectorFactory< ? > getDetectorFactory();
+	protected abstract IlastikDetectorFactory< ? > getDetectorFactory();
 
 	/**
 	 * Launch detection on the current frame.

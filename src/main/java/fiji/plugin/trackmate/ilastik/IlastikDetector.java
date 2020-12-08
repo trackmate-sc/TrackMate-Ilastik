@@ -1,18 +1,17 @@
 package fiji.plugin.trackmate.ilastik;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.DetectionUtils;
-import fiji.plugin.trackmate.detection.SpotDetector;
+import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-public class IlastikDetector< T extends RealType< T > & NativeType< T > > implements SpotDetector< T >
+public class IlastikDetector< T extends RealType< T > & NativeType< T > > implements SpotGlobalDetector< T >
 {
 
 	private final static String BASE_ERROR_MESSAGE = "IlastikDetector: ";
@@ -35,7 +34,7 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 
 	protected long processingTime;
 
-	protected List< Spot > spots = new ArrayList<>();
+	protected SpotCollection spots;
 
 	public IlastikDetector(
 			final ImgPlus< T > img,
@@ -87,7 +86,7 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 	}
 
 	@Override
-	public List< Spot > getResult()
+	public SpotCollection getResult()
 	{
 		return spots;
 	}
@@ -100,9 +99,9 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 			errorMessage = baseErrorMessage + "Image is null.";
 			return false;
 		}
-		if ( img.numDimensions() != 2 )
+		if ( img.dimensionIndex( Axes.Z ) >= 0 )
 		{
-			errorMessage = baseErrorMessage + "Image must be 2D, got " + img.numDimensions() + "D.";
+			errorMessage = baseErrorMessage + "Image must be 2D over time, got and image with multiple Z.";
 			return false;
 		}
 		return true;
