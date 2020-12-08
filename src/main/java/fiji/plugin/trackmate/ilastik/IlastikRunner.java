@@ -5,131 +5,150 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import org.ilastik.ilastik4ij.executors.AbstractIlastikExecutor.PixelPredictionType;
 import org.ilastik.ilastik4ij.executors.PixelClassification;
+import org.ilastik.ilastik4ij.ui.IlastikOptions;
+import org.scijava.Context;
 import org.scijava.app.StatusService;
 import org.scijava.log.LogService;
+import org.scijava.options.OptionsService;
 
+import fiji.plugin.trackmate.Spot;
+import fiji.plugin.trackmate.SpotRoi;
+import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
-import ij.plugin.frame.RoiManager;
+import ij.measure.Measurements;
 import ij.process.FloatPolygon;
-import net.imagej.Dataset;
-import net.imagej.ImageJ;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.ops.MetadataUtil;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
+import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.view.Views;
 
-public class IlastikTests
+public class IlastikRunner
 {
 
-	public static < T extends RealType< T > & NativeType< T > > void main( final String[] args ) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
+	/**
+	 * Smoothing interval for ROIs.
+	 */
+	private static final double smoothInterval = 2.;
+
+	/**
+	 * Douglas-Peucker polygon simplification max distance.
+	 */
+	private static final double epsilon = 0.5;
+
+	private final static Context context = TMUtils.getContext();
+
+	/**
+	 * 
+	 * @param <T>
+	 * @param projectFilePath
+	 * @param input
+	 * @param classId
+	 * @param probaThreshold
+	 * @param logService
+	 * @param statusService
+	 * @param threshold
+	 * @return
+	 * @throws IOException
+	 *             if the Ilastik file cannot be found.
+	 */
+	public static < T extends RealType< T > & NativeType< T > > List< Spot > run(
+			final ImgPlus< T > input,
+			final Interval interval,
+			final double[] calibration,
+			final String projectFilePath,
+			final long classId,
+			final double probaThreshold ) throws IOException
 	{
-		Locale.setDefault( Locale.ROOT );
-		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 
-		final ImageJ ij = new ImageJ();
-		ij.launch( args );
-		final LogService logService = ij.log();
-		final StatusService statusService = ij.status();
+		final LogService logService = context.getService( LogService.class );
+		final StatusService statusService = context.getService( StatusService.class );
+		final OptionsService optionService = context.getService( OptionsService.class );
 
-		final File executableFilePath = new File( "C:/Program Files/ilastik-1.3.3post3/ilastik.exe" );
-		final File projectFileName = new File( "D:/Projects/NVerttiQuintero/Ilastik/NVertti.ilp" );
-		final int numThreads = Runtime.getRuntime().availableProcessors() / 2;
-		final int maxRamMb = 16_000;
+		/*
+		 * Properly set the image to process: crop it.
+		 */
+
+		final RandomAccessibleInterval< T > crop = Views.interval( input, interval );
+		final RandomAccessibleInterval< T > zeroMinCrop = Views.zeroMin( crop );
+
+		final ImgPlus< T > cropped = new ImgPlus<>( ImgView.wrap( zeroMinCrop, input.factory() ) );
+		MetadataUtil.copyImgPlusMetadata( input, cropped );
+
+		/*
+		 * Discover and use Ilastik config.
+		 */
+
+		final IlastikOptions ilastikOptions = optionService.getOptions( IlastikOptions.class );
+		final File executableFilePath = ilastikOptions.getExecutableFile();
+		final int numThreads = ilastikOptions.getNumThreads();
+		final int maxRamMb = ilastikOptions.getMaxRamMb();
+
+		/*
+		 * Run Ilastik.
+		 */
+
+		final File projectFile = new File( projectFilePath );
 		final PixelClassification classifier = new PixelClassification(
 				executableFilePath,
-				projectFileName,
+				projectFile,
 				logService,
 				statusService,
 				numThreads,
 				maxRamMb );
-
-		System.out.println( "Loading image." );
-		final String imagePath = "D:/Projects/NVerttiQuintero/Data/Series063a-ch1.tif";
-		final Dataset dataset = ( Dataset ) ij.io().open( imagePath );
-		@SuppressWarnings( "unchecked" )
-		final ImgPlus< T > input = ( ImgPlus< T > ) dataset.getImgPlus();
-
-		System.out.println( "Running prediction." );
-//		final PixelPredictionType predictionType = PixelPredictionType.Segmentation;
 		final PixelPredictionType predictionType = PixelPredictionType.Probabilities;
-		final ImgPlus< T > output = classifier.classifyPixels( input, predictionType );
 
-		System.out.println( "Done." );
-//		ij.ui().show( output );
+		final ImgPlus< T > output = classifier.classifyPixels( cropped, predictionType );
+		final ImgPlus< T > proba = ImgPlusViews.hyperSlice( output, output.dimensionIndex( Axes.CHANNEL ), classId );
 
-		final ImagePlus imp = ImageJFunctions.show( output );
+		/*
+		 * Create ROIs from proba.
+		 */
 
-		final long targetChannel = 0;
-		final ImgPlus< T > proba = ImgPlusViews.hyperSlice( output, output.dimensionIndex( Axes.CHANNEL ), targetChannel );
-
-		final long nTimepoints = proba.dimension( proba.dimensionIndex( Axes.TIME ) );
-		
-		// Threshold on probabiliyt map.
-		final double threshold = 0.5;
-		// Smoothing interval for ROIs.
-		final double smoothInterval = 2.;
-		// Douglas-Peucker polygon simplification max distance.
-		final double epsilon = 0.5;
-
-		final Converter< T, BitType > thresholder = ( r, b) -> b.set( r.getRealDouble() > threshold  );
-		
-		final RoiManager roiManager = RoiManager.getRoiManager();
-		for ( int t = 0; t < nTimepoints; t++ )
+		final ImagePlus probaImp = ImageJFunctions.wrap( proba, "Class " + classId + " proba" );
+		final Converter< T, BitType > thresholder = ( r, b ) -> b.set( r.getRealDouble() > probaThreshold );
+		final RandomAccessibleInterval< BitType > mask = Converters.convertRAI( proba, thresholder, new BitType() );
+		final List< Polygon > polygons = maskToPolygons( mask );
+		final List< Spot > spots = new ArrayList<>( polygons.size() );
+		for ( final Polygon polygon : polygons )
 		{
-			imp.setT( t + 1 );
-			final ImgPlus< T > frame = ImgPlusViews.hyperSlice( proba, proba.dimensionIndex( Axes.TIME ), t );
-			final RandomAccessibleInterval< BitType > mask = Converters.convertRAI( frame, thresholder, new BitType() );
-			final List< Polygon > spots = maskToSpots( mask );
-			for ( final Polygon polygon : spots )
+			final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
+
+			// Measure quality.
+			probaImp.setRoi( roi );
+			final double quality = probaImp.getStatistics( Measurements.MIN_MAX ).max;
+
+			// Create Spot ROI.
+			final PolygonRoi fRoi = simplify( roi, smoothInterval, epsilon );
+			final Polygon fPolygon = fRoi.getPolygon();
+			final double[] xpoly = new double[ fPolygon.npoints ];
+			final double[] ypoly = new double[ fPolygon.npoints ];
+			for ( int i = 0; i < fPolygon.npoints; i++ )
 			{
-				final PolygonRoi roi = new PolygonRoi( polygon, PolygonRoi.POLYGON );
-				final PolygonRoi fRoi = simplify( roi, smoothInterval, epsilon );
-				fRoi.setPosition( ( int ) targetChannel, 0, t + 1 );
-				roiManager.addRoi( fRoi );
+				xpoly[ i ] = calibration[ 0 ] * ( interval.min( 0 ) + fPolygon.xpoints[ i ] );
+				ypoly[ i ] = calibration[ 1 ] * ( interval.min( 1 ) + fPolygon.ypoints[ i ] );
 			}
+			spots.add( SpotRoi.createSpot( xpoly, ypoly, quality ) );
 		}
-		roiManager.setVisible( true );
+		return spots;
 	}
 
-	public static final PolygonRoi simplify( final PolygonRoi roi, final double smoothInterval, final double epsilon )
-	{
-		final FloatPolygon fPoly = roi.getInterpolatedPolygon( smoothInterval, true );
-
-		final List< double[] > points = new ArrayList<>( fPoly.npoints );
-		for ( int i = 0; i < fPoly.npoints; i++ )
-			points.add( new double[] { fPoly.xpoints[ i ], fPoly.ypoints[ i ] } );
-
-		final List< double[] > simplifiedPoints = RamerDouglasPeucker.douglasPeucker( points, epsilon );
-
-		final float[] sX = new float[ simplifiedPoints.size() ];
-		final float[] sY = new float[ simplifiedPoints.size() ];
-		for ( int i = 0; i < sX.length; i++ )
-		{
-			sX[ i ] = ( float ) simplifiedPoints.get( i )[ 0 ];
-			sY[ i ] = ( float ) simplifiedPoints.get( i )[ 1 ];
-		}
-		final FloatPolygon simplifiedPolygon = new FloatPolygon( sX, sY );
-		final PolygonRoi fRoi = new PolygonRoi( simplifiedPolygon, PolygonRoi.POLYGON );
-		return fRoi;
-	}
-
-	public static final < B extends BooleanType< B > > List< Polygon > maskToSpots( final RandomAccessibleInterval< B > mask )
+	private static final < B extends BooleanType< B > > List< Polygon > maskToPolygons( final RandomAccessibleInterval< B > mask )
 	{
 		final int w = ( int ) mask.dimension( 0 );
 		final int h = ( int ) mask.dimension( 1 );
@@ -355,7 +374,7 @@ public class IlastikTests
 		return polygons;
 	}
 
-	/*
+	/**
 	 * This class implements a Cartesian polygon in progress. The edges are
 	 * supposed to be parallel to the x or y axis. It is implemented as a deque
 	 * to be able to add points to both sides.
@@ -559,4 +578,27 @@ public class IlastikTests
 			return res + "]";
 		}
 	}
+
+	private static final PolygonRoi simplify( final PolygonRoi roi, final double smoothInterval, final double epsilon )
+	{
+		final FloatPolygon fPoly = roi.getInterpolatedPolygon( smoothInterval, true );
+
+		final List< double[] > points = new ArrayList<>( fPoly.npoints );
+		for ( int i = 0; i < fPoly.npoints; i++ )
+			points.add( new double[] { fPoly.xpoints[ i ], fPoly.ypoints[ i ] } );
+
+		final List< double[] > simplifiedPoints = RamerDouglasPeucker.douglasPeucker( points, epsilon );
+
+		final float[] sX = new float[ simplifiedPoints.size() ];
+		final float[] sY = new float[ simplifiedPoints.size() ];
+		for ( int i = 0; i < sX.length; i++ )
+		{
+			sX[ i ] = ( float ) simplifiedPoints.get( i )[ 0 ];
+			sY[ i ] = ( float ) simplifiedPoints.get( i )[ 1 ];
+		}
+		final FloatPolygon simplifiedPolygon = new FloatPolygon( sX, sY );
+		final PolygonRoi fRoi = new PolygonRoi( simplifiedPolygon, PolygonRoi.POLYGON );
+		return fRoi;
+	}
+
 }
