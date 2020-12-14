@@ -26,6 +26,7 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import fiji.plugin.trackmate.detection.SpotGlobalDetectorFactory;
 import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
@@ -139,7 +140,6 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 		return checkSettings( settings );
 	}
 
-
 	@Override
 	public String getErrorMessage()
 	{
@@ -214,6 +214,23 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 		ok = ok & checkMapKeys( settings, mandatoryKeys, null, errorHolder );
 		if ( !ok )
 			errorMessage = errorHolder.toString();
+
+		// Extra test to make sure we can read the classifier file.
+		if ( ok )
+		{
+			final Object obj = settings.get( KEY_CLASSIFIER_FILEPATH );
+			if ( obj == null )
+			{
+				errorMessage = "The path to the ilastik file is not set.";
+				return false;
+			}
+
+			if ( !IOUtils.canReadFile( ( String ) obj, errorHolder ) )
+			{
+				errorMessage = "Problem with ilastik file: " + errorHolder.toString();
+				return false;
+			}
+		}
 
 		return ok;
 	}
