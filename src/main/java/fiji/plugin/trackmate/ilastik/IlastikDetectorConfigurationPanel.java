@@ -34,6 +34,7 @@ import org.scijava.prefs.PrefService;
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
+import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.JLabelLogger;
@@ -53,10 +54,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	private final JSlider sliderChannel;
 
 	private final JSlider sliderClassId;
-
-	private final JButton btnPreview;
-
-	private final Logger localLogger;
 
 	private final JTextField modelFileTextField;
 
@@ -91,16 +88,16 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gbc_lblSettingsForDetector.gridy = 0;
 		add( lblSettingsForDetector, gbc_lblSettingsForDetector );
 
-		final JLabel lblStardistDetector = new JLabel( TITLE, ICON, JLabel.RIGHT );
-		lblStardistDetector.setFont( BIG_FONT );
-		lblStardistDetector.setHorizontalAlignment( SwingConstants.CENTER );
-		final GridBagConstraints gbc_lblStardistDetector = new GridBagConstraints();
-		gbc_lblStardistDetector.gridwidth = 3;
-		gbc_lblStardistDetector.insets = new Insets( 5, 5, 5, 0 );
-		gbc_lblStardistDetector.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblStardistDetector.gridx = 0;
-		gbc_lblStardistDetector.gridy = 1;
-		add( lblStardistDetector, gbc_lblStardistDetector );
+		final JLabel lblDetector = new JLabel( TITLE, ICON, JLabel.RIGHT );
+		lblDetector.setFont( BIG_FONT );
+		lblDetector.setHorizontalAlignment( SwingConstants.CENTER );
+		final GridBagConstraints gbc_lblDetector = new GridBagConstraints();
+		gbc_lblDetector.gridwidth = 3;
+		gbc_lblDetector.insets = new Insets( 5, 5, 5, 0 );
+		gbc_lblDetector.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblDetector.gridx = 0;
+		gbc_lblDetector.gridy = 1;
+		add( lblDetector, gbc_lblDetector );
 
 		/*
 		 * Help text.
@@ -186,10 +183,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		modelFileTextField.setColumns( 10 );
 
 		/*
-		 * Proba threshold.
-		 */
-
-		/*
 		 * Class index.
 		 */
 
@@ -226,7 +219,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		sliderClassId.setValue( 1 );
 
 		/*
-		 * Preview.
+		 * Proba threshold.
 		 */
 
 		final JLabel lblScoreTreshold = new JLabel( "Threshold on probability:" );
@@ -249,16 +242,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gbc_score.gridy = 7;
 		add( ftfProbaThreshold, gbc_score );
 
-		btnPreview = new JButton( "Preview", ICON_PREVIEW );
-		btnPreview.setFont( FONT );
-		final GridBagConstraints gbc_btnPreview = new GridBagConstraints();
-		gbc_btnPreview.gridwidth = 2;
-		gbc_btnPreview.anchor = GridBagConstraints.SOUTHEAST;
-		gbc_btnPreview.insets = new Insets( 5, 5, 5, 5 );
-		gbc_btnPreview.gridx = 1;
-		gbc_btnPreview.gridy = 9;
-		add( btnPreview, gbc_btnPreview );
-
 		/*
 		 * Logger.
 		 */
@@ -269,13 +252,34 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gbc_labelLogger.gridx = 0;
 		gbc_labelLogger.gridy = 10;
 		add( labelLogger, gbc_labelLogger );
-		localLogger = labelLogger.getLogger();
+		final Logger localLogger = labelLogger.getLogger();
 
-		btnPreview.addActionListener( l -> preview( btnPreview, localLogger ) );
+		/*
+		 * Preview.
+		 */
+
+		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
+		btnPreview.setFont( FONT );
+		final GridBagConstraints gbc_btnPreview = new GridBagConstraints();
+		gbc_btnPreview.gridwidth = 2;
+		gbc_btnPreview.anchor = GridBagConstraints.SOUTHEAST;
+		gbc_btnPreview.insets = new Insets( 5, 5, 5, 5 );
+		gbc_btnPreview.gridx = 1;
+		gbc_btnPreview.gridy = 9;
+		add( btnPreview, gbc_btnPreview );
 
 		/*
 		 * Listeners and specificities.
 		 */
+
+		btnPreview.addActionListener( e -> DetectionUtils.preview(
+				model,
+				settings,
+				getDetectorFactory(),
+				getSettings(),
+				settings.imp.getFrame() - 1,
+				localLogger,
+				b -> btnPreview.setEnabled( b ) ) );
 
 		/*
 		 * Deal with channels: the slider and channel labels are only visible if
