@@ -3,7 +3,6 @@ package fiji.plugin.trackmate.ilastik;
 import java.io.IOException;
 
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
@@ -45,7 +44,7 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 			final double probaThreshold )
 	{
 		this.img = img;
-		this.interval = DetectionUtils.squeeze( interval );
+		this.interval = interval;
 		this.calibration = calibration;
 		this.classifierPath = classifierPath;
 		this.classIndex = classIndex;
