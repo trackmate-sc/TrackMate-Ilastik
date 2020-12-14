@@ -69,9 +69,9 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 144, 0, 32 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 84, 0, 27, 0, 0, 0, 37, 23 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 84, 0, 27, 0, 0, 0, 0, 37, 23 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0 };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
 		setLayout( gridBagLayout );
 
 		final JLabel lblSettingsForDetector = new JLabel( "Settings for detector:" );
@@ -152,7 +152,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		lblCusstomModelFile.setFont( FONT );
 		final GridBagConstraints gbc_lblCusstomModelFile = new GridBagConstraints();
 		gbc_lblCusstomModelFile.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblCusstomModelFile.insets = new Insets( 0, 5, 5, 5 );
+		gbc_lblCusstomModelFile.insets = new Insets( 0, 5, 0, 5 );
 		gbc_lblCusstomModelFile.gridx = 0;
 		gbc_lblCusstomModelFile.gridy = 4;
 		add( lblCusstomModelFile, gbc_lblCusstomModelFile );
@@ -160,7 +160,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		btnBrowse = new JButton( "Browse" );
 		btnBrowse.setFont( FONT );
 		final GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
-		gbc_btnBrowse.insets = new Insets( 5, 0, 5, 5 );
+		gbc_btnBrowse.insets = new Insets( 5, 0, 0, 5 );
 		gbc_btnBrowse.anchor = GridBagConstraints.SOUTHEAST;
 		gbc_btnBrowse.gridwidth = 2;
 		gbc_btnBrowse.gridx = 1;
@@ -171,7 +171,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		modelFileTextField.setFont( SMALL_FONT );
 		final GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.gridwidth = 3;
-		gbc_textField.insets = new Insets( 0, 5, 5, 0 );
+		gbc_textField.insets = new Insets( 0, 5, 5, 5 );
 		gbc_textField.fill = GridBagConstraints.BOTH;
 		gbc_textField.gridx = 0;
 		gbc_textField.gridy = 5;
@@ -221,7 +221,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		 * Preview.
 		 */
 
-		final JLabel lblScoreTreshold = new JLabel( "Treshold on probability:" );
+		final JLabel lblScoreTreshold = new JLabel( "Threshold on probability:" );
 		lblScoreTreshold.setFont( SMALL_FONT );
 		final GridBagConstraints gbc_lblScoreTreshold = new GridBagConstraints();
 		gbc_lblScoreTreshold.anchor = GridBagConstraints.EAST;
@@ -231,8 +231,8 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		add( lblScoreTreshold, gbc_lblScoreTreshold );
 
 		ftfProbaThreshold = new JFormattedTextField( THRESHOLD_FORMAT );
-		ftfProbaThreshold.setFont( FONT );
-		ftfProbaThreshold.setMinimumSize( new Dimension( 60, 26 ) );
+		ftfProbaThreshold.setFont( SMALL_FONT );
+		ftfProbaThreshold.setMinimumSize( new Dimension( 60, 20 ) );
 		ftfProbaThreshold.setHorizontalAlignment( SwingConstants.CENTER );
 		final GridBagConstraints gbc_score = new GridBagConstraints();
 		gbc_score.fill = GridBagConstraints.HORIZONTAL;
@@ -248,7 +248,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gbc_btnPreview.anchor = GridBagConstraints.SOUTHEAST;
 		gbc_btnPreview.insets = new Insets( 5, 5, 5, 5 );
 		gbc_btnPreview.gridx = 1;
-		gbc_btnPreview.gridy = 8;
+		gbc_btnPreview.gridy = 9;
 		add( btnPreview, gbc_btnPreview );
 
 		/*
@@ -257,10 +257,9 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabelLogger labelLogger = new JLabelLogger();
 		final GridBagConstraints gbc_labelLogger = new GridBagConstraints();
-		gbc_labelLogger.anchor = GridBagConstraints.EAST;
 		gbc_labelLogger.gridwidth = 3;
 		gbc_labelLogger.gridx = 0;
-		gbc_labelLogger.gridy = 9;
+		gbc_labelLogger.gridy = 10;
 		add( labelLogger, gbc_labelLogger );
 		localLogger = labelLogger.getLogger();
 
