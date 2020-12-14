@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -28,12 +29,15 @@ import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import org.scijava.prefs.PrefService;
+
 import fiji.plugin.trackmate.Logger;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.JLabelLogger;
+import fiji.plugin.trackmate.util.TMUtils;
 
 public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfigurationPanel
 {
@@ -60,12 +64,15 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	private final JFormattedTextField ftfProbaThreshold;
 
+	protected final PrefService prefService;
+
 	/**
 	 * Create the panel.
 	 */
 	public IlastikDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
 		super( settings, model );
+		this.prefService = TMUtils.getContext().getService( PrefService.class );
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 144, 0, 32 };
@@ -213,6 +220,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		add( labelClassId, gbc_labelClassId );
 
 		sliderClassId.addChangeListener( l -> labelClassId.setText( "" + sliderClassId.getValue() ) );
+		// We don't know yet how many classes we have. Let's put 10 for now.
 		sliderClassId.setMaximum( 10 );
 		sliderClassId.setMinimum( 1 );
 		sliderClassId.setValue( 1 );
@@ -294,10 +302,10 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 			}
 		}
 
-		/*
-		 * We don't know yet how many classes we have. Let's put 10 for now.
-		 */
 		btnBrowse.addActionListener( l -> browse() );
+		final PropertyChangeListener l = e -> prefService.put(
+				IlastikDetectorConfigurationPanel.class, KEY_CLASSIFIER_FILEPATH, modelFileTextField.getText() );
+		modelFileTextField.addPropertyChangeListener( "value", l );
 	}
 
 	@Override
@@ -322,9 +330,13 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	public void setSettings( final Map< String, Object > settings )
 	{
 		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		modelFileTextField.setText( ( String ) settings.get( KEY_CLASSIFIER_FILEPATH ) );
 		sliderClassId.setValue( ( Integer ) settings.get( KEY_CLASS_INDEX ) + 1 );
 		ftfProbaThreshold.setValue( settings.get( KEY_PROBA_THRESHOLD ) );
+		
+		String filePath = ( String ) settings.get( KEY_CLASSIFIER_FILEPATH );
+		if ( filePath == null || filePath.isEmpty() )
+			filePath = prefService.get( IlastikDetectorConfigurationPanel.class, KEY_CLASSIFIER_FILEPATH );
+		modelFileTextField.setText( filePath );
 	}
 
 	@Override
@@ -344,7 +356,11 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		try
 		{
 			final File file = FileChooser.chooseFile( this, modelFileTextField.getText(), fileFilter, "Select an ilastik project file", DialogType.LOAD );
-			modelFileTextField.setText( file.getAbsolutePath() );
+			if ( file != null )
+			{
+				modelFileTextField.setText( file.getAbsolutePath() );
+				prefService.put( IlastikDetectorConfigurationPanel.class, KEY_CLASSIFIER_FILEPATH, file.getAbsolutePath() );
+			}
 		}
 		finally
 		{
