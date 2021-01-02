@@ -12,10 +12,12 @@ public class TrackMateIlastikTestDrive
 	{
 		final ImageJ ij = new ImageJ();
 		ij.launch( args );
-		final Dataset dataset = ( Dataset ) ij.io().open( "D:/Projects/NVerttiQuintero/Data/Series014b.tif" );
+		final String path = "D:\\Projects\\NVerttiQuintero\\Data\\Series014b.tif";
+//		"D:/Projects/NVerttiQuintero/Data/Series014b.tif"
+		final Dataset dataset = ( Dataset ) ij.io().open( path );
 		ij.ui().show( dataset );
 
-		new TrackMatePlugIn_().run( null );
+		new TrackMatePlugIn().run( null );
 	}
 
 }

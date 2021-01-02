@@ -8,8 +8,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.detection.DetectorKeys;
+import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
 import fiji.plugin.trackmate.ilastik.IlastikDetectorFactory;
-import fiji.plugin.trackmate.visualization.TrackMateModelView;
 import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
 import ij.ImagePlus;
@@ -65,10 +65,8 @@ public class TrackMateIlastikScript
 		 */
 
 		final SelectionModel selectionModel = new SelectionModel( model );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp );
-		view.setDisplaySettings( TrackMateModelView.KEY_DISPLAY_SPOT_AS_ROIS, true );
+		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, DisplaySettingsIO.readUserDefault() );
 		view.render();
 		view.refresh();
-
 	}
 }
