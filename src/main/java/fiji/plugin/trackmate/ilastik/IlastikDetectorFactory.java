@@ -25,10 +25,11 @@ import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import fiji.plugin.trackmate.detection.SpotGlobalDetectorFactory;
-import fiji.plugin.trackmate.gui.ConfigurationPanel;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.io.IOUtils;
 import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
@@ -266,9 +267,8 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	 */
 	protected ImgPlus< T > prepareImg()
 	{
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
-		ImgPlus< T > imFrame;
-		final int cDim = TMUtils.findCAxisIndex( img );
+		final int cDim = img.dimensionIndex( Axes.CHANNEL );
+		final ImgPlus< T > imFrame;
 		if ( cDim < 0 )
 		{
 			imFrame = img;
@@ -279,19 +279,6 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 			final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 			imFrame = ImgPlusViews.hyperSlice( img, cDim, channel );
 		}
-
-		// In case we have a 1D image.
-		if ( img.dimension( 0 ) < 2 )
-		{ // Single column image, will be rotated internally.
-			calibration[ 0 ] = calibration[ 1 ]; // It gets NaN otherwise
-			calibration[ 1 ] = 1;
-			imFrame = ImgPlusViews.hyperSlice( imFrame, 0, 0 );
-		}
-		if ( img.dimension( 1 ) < 2 )
-		{ // Single line image
-			imFrame = ImgPlusViews.hyperSlice( imFrame, 1, 0 );
-		}
-
 		return imFrame;
 	}
 

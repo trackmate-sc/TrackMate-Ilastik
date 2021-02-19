@@ -1,9 +1,10 @@
 package fiji.plugin.trackmate.ilastik;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.BIG_FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.FONT;
-import static fiji.plugin.trackmate.gui.TrackMateWizard.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
+import static fiji.plugin.trackmate.gui.Fonts.FONT;
+import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.PREVIEW_ICON;
 import static fiji.plugin.trackmate.ilastik.IlastikDetectorFactory.KEY_CLASSIFIER_FILEPATH;
 import static fiji.plugin.trackmate.ilastik.IlastikDetectorFactory.KEY_CLASS_INDEX;
 import static fiji.plugin.trackmate.ilastik.IlastikDetectorFactory.KEY_PROBA_THRESHOLD;
@@ -258,7 +259,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		 * Preview.
 		 */
 
-		final JButton btnPreview = new JButton( "Preview", ICON_PREVIEW );
+		final JButton btnPreview = new JButton( "Preview", PREVIEW_ICON );
 		btnPreview.setFont( FONT );
 		final GridBagConstraints gbc_btnPreview = new GridBagConstraints();
 		gbc_btnPreview.gridwidth = 2;
