@@ -87,6 +87,10 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 			+ "that will be thresholded to yield objects. Spots are created with "
 			+ "these objects, with a quality equal to the maximal value of the "
 			+ "probability image in the cell. "
+			+ "<p>"
+			+ "If you use this detector for your work, please be so kind as to "
+			+ "also cite the Ilastik paper: <i>Berg, S., Kutra, D., Kroeger, T. et al. ilastik: "
+			+ "interactive machine learning for (bio)image analysis. Nat Methods 16, 1226–1232 (2019)</i>"
 			+ "</html>";
 
 	/*
