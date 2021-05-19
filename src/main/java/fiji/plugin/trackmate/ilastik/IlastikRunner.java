@@ -76,7 +76,7 @@ public class IlastikRunner
 
 		final IlastikOptions ilastikOptions = optionService.getOptions( IlastikOptions.class );
 		final File executableFilePath = ilastikOptions.getExecutableFile();
-		final int numThreads = ilastikOptions.getNumThreads();
+		final int numThreads = ilastikOptions.getNumThreads() < 0 ? Runtime.getRuntime().availableProcessors() : ilastikOptions.getNumThreads();
 		final int maxRamMb = ilastikOptions.getMaxRamMb();
 
 		/*
@@ -103,11 +103,12 @@ public class IlastikRunner
 
 		final SpotCollection spots = new SpotCollection();
 		final int timeIndex = proba.dimensionIndex( Axes.TIME );
-		final int t0 = ( int ) interval.min( 2 );
+		final int t0 = interval.numDimensions() > 2 ? ( int ) interval.min( 2 ) : 0;
 		for ( int t = 0; t < proba.dimension( timeIndex ); t++ )
 		{
 			final List< Spot > spotsThisFrame;
-			final ImgPlus< T > probaThisFrame = ImgPlusViews.hyperSlice( proba, timeIndex, t );
+			final ImgPlus< T > probaThisFrame = TMUtils.hyperSlice( proba, 0, t );
+
 			if ( DetectionUtils.is2D( probaThisFrame ) )
 			{
 				/*
@@ -115,8 +116,8 @@ public class IlastikRunner
 				 */
 				final boolean simplify = true;
 				spotsThisFrame = MaskUtils.fromThresholdWithROI(
-						probaThisFrame, 
-						probaThisFrame, 
+						probaThisFrame,
+						probaThisFrame,
 						calibration, 
 						probaThreshold, 
 						simplify, 
