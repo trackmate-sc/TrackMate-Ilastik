@@ -173,7 +173,7 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 		final StringBuilder errorHolder = new StringBuilder();
 		boolean ok = true;
 		ok = ok && readIntegerAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
-		ok = ok && readStringAttribute( element, settings, KEY_TARGET_CHANNEL, errorHolder );
+		ok = ok && readStringAttribute( element, settings, KEY_CLASSIFIER_FILEPATH, errorHolder );
 		ok = ok && readIntegerAttribute( element, settings, KEY_CLASS_INDEX, errorHolder );
 		ok = ok && readDoubleAttribute( element, settings, KEY_PROBA_THRESHOLD, errorHolder );
 
