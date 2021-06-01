@@ -26,7 +26,6 @@ import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 public class IlastikRunner
@@ -65,9 +64,6 @@ public class IlastikRunner
 		 * Properly set the image to process: crop it.
 		 */
 
-		System.out.println( "Interval: " + Util.printInterval( interval ) ); // DEBUG
-		System.out.println( "Input: " + Util.printInterval( input ) ); // DEBUG
-
 		final RandomAccessibleInterval< T > crop = Views.interval( input, interval );
 		final RandomAccessibleInterval< T > zeroMinCrop = Views.zeroMin( crop );
 
@@ -80,7 +76,7 @@ public class IlastikRunner
 
 		final IlastikOptions ilastikOptions = optionService.getOptions( IlastikOptions.class );
 		final File executableFilePath = ilastikOptions.getExecutableFile();
-		final int numThreads = ilastikOptions.getNumThreads();
+		final int numThreads = ilastikOptions.getNumThreads() < 0 ? Runtime.getRuntime().availableProcessors() : ilastikOptions.getNumThreads();
 		final int maxRamMb = ilastikOptions.getMaxRamMb();
 
 		/*
@@ -107,11 +103,12 @@ public class IlastikRunner
 
 		final SpotCollection spots = new SpotCollection();
 		final int timeIndex = proba.dimensionIndex( Axes.TIME );
-		final int t0 = ( int ) interval.min( 2 );
+		final int t0 = interval.numDimensions() > 2 ? ( int ) interval.min( 2 ) : 0;
 		for ( int t = 0; t < proba.dimension( timeIndex ); t++ )
 		{
 			final List< Spot > spotsThisFrame;
-			final ImgPlus< T > probaThisFrame = ImgPlusViews.hyperSlice( proba, timeIndex, t );
+			final ImgPlus< T > probaThisFrame = TMUtils.hyperSlice( proba, 0, t );
+
 			if ( DetectionUtils.is2D( probaThisFrame ) )
 			{
 				/*
@@ -121,10 +118,10 @@ public class IlastikRunner
 				spotsThisFrame = MaskUtils.fromThresholdWithROI(
 						probaThisFrame,
 						probaThisFrame,
-						calibration,
-						probaThreshold,
-						simplify,
-						numThreads,
+						calibration, 
+						probaThreshold, 
+						simplify, 
+						numThreads, 
 						probaThisFrame );
 			}
 			else
