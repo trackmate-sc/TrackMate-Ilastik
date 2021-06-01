@@ -118,15 +118,27 @@ public class IlastikRunner
 				 * 2D: we compute and store the contour.
 				 */
 				final boolean simplify = true;
-				spotsThisFrame = MaskUtils.toSpotsWithROI( probaThisFrame, probaThisFrame, calibration, probaThreshold, simplify, probaThisFrame );
-
+				spotsThisFrame = MaskUtils.fromThresholdWithROI(
+						probaThisFrame,
+						probaThisFrame,
+						calibration,
+						probaThreshold,
+						simplify,
+						numThreads,
+						probaThisFrame );
 			}
 			else
 			{
 				/*
 				 * 3D: We create spots of the same volume that of the region.
 				 */
-				spotsThisFrame = MaskUtils.toSpots( probaThisFrame, probaThisFrame, calibration, probaThreshold, numThreads );
+				spotsThisFrame = MaskUtils.fromThreshold(
+						probaThisFrame,
+						probaThisFrame,
+						calibration,
+						probaThreshold,
+						numThreads,
+						probaThisFrame );
 			}
 
 			/*
