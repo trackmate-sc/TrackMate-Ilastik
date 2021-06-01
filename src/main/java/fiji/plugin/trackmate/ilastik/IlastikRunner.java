@@ -55,16 +55,7 @@ public class IlastikRunner
 	private final static Context context = TMUtils.getContext();
 
 	/**
-	 * 
-	 * @param <T>
-	 * @param projectFilePath
-	 * @param input
-	 * @param classId
-	 * @param probaThreshold
-	 * @param logService
-	 * @param statusService
-	 * @param threshold
-	 * @return
+	 * @return a new {@link SpotCollection}
 	 * @throws IOException
 	 *             if the Ilastik file cannot be found.
 	 */
