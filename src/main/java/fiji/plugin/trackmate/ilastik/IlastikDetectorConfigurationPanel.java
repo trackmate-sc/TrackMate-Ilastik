@@ -71,7 +71,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	private static final String TITLE = IlastikDetectorFactory.NAME;
 
-	private static final FileFilter fileFilter = new FileNameExtensionFilter( "Ilastik project files.", "ilp" );
+	private static final FileFilter fileFilter = new FileNameExtensionFilter( "ilastik project files.", "ilp" );
 
 	private final JSlider sliderChannel;
 
@@ -174,7 +174,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		 * Model file.
 		 */
 
-		final JLabel lblCusstomModelFile = new JLabel( "Ilastik file:" );
+		final JLabel lblCusstomModelFile = new JLabel( "ilastik file:" );
 		lblCusstomModelFile.setFont( FONT );
 		final GridBagConstraints gbc_lblCusstomModelFile = new GridBagConstraints();
 		gbc_lblCusstomModelFile.anchor = GridBagConstraints.SOUTHWEST;

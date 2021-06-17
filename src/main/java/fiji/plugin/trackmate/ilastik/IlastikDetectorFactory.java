@@ -89,28 +89,28 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	public static final String DETECTOR_KEY = "ILASTIK_DETECTOR";
 
 	/** The pretty name of the target detector. */
-	public static final String NAME = "Ilastik detector";
+	public static final String NAME = "ilastik detector";
 
 	/** An html information text. */
 	public static final String INFO_TEXT = "<html>"
-			+ "This detector relies on Ilastik to detect objects."
+			+ "This detector relies on ilastik to detect objects."
 			+ "<p>"
 			+ "It only works for 2D images."
 			+ "And for this detector to work, the 'ilastik' update site "
 			+ "must be activated in your Fiji installation. "
 			+ "You also need to properly configure the Ilastik Fiji plugin."
-			+ "You have to specify the Ilastik software path, max RAM and max"
-			+ "number of threads to use in the Ilastik option menu: <i>Plugins "
+			+ "You have to specify the ilastik software path, max RAM and max"
+			+ "number of threads to use in the ilastik option menu: <i>Plugins "
 			+ "> ilastik > Configure ilastik executable location</i>.  "
 			+ "<p>"
-			+ "This detector allows you to apply an Ilastik pixel classifier to "
+			+ "This detector allows you to apply an ilastik pixel classifier to "
 			+ "the source image. It will give the probability map for each class "
 			+ "that will be thresholded to yield objects. Spots are created with "
 			+ "these objects, with a quality equal to the maximal value of the "
 			+ "probability image in the cell. "
 			+ "<p>"
 			+ "If you use this detector for your work, please be so kind as to "
-			+ "also cite the Ilastik paper: <i>Berg, S., Kutra, D., Kroeger, T. et al. ilastik: "
+			+ "also cite the ilastik paper: <i>Berg, S., Kutra, D., Kroeger, T. et al. ilastik: "
 			+ "interactive machine learning for (bio)image analysis. Nat Methods 16, 1226–1232 (2019)</i>"
 			+ "</html>";
 
