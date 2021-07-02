@@ -1,3 +1,5 @@
+[![](https://github.com/tinevez/TrackMate-Ilastik/actions/workflows/build-main.yml/badge.svg)](https://github.com/tinevez/TrackMate-Ilastik/actions/workflows/build-main.yml)
+
 # TrackMate-ilastik
 
 A TrackMate detector that uses an ilastik pixel classifiers as detector to create objects to track.
