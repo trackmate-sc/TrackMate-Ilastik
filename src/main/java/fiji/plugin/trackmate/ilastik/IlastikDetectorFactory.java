@@ -312,4 +312,10 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	{
 		return true;
 	}
+
+	@Override
+	public IlastikDetectorFactory< T > copy()
+	{
+		return new IlastikDetectorFactory<>();
+	}
 }
