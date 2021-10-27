@@ -59,8 +59,7 @@ public class TrackMateIlastikScript
 		final ImagePlus imp = IJ.openImage( imagePath );
 		imp.show();
 
-		final Settings settings = new Settings();
-		settings.setFrom( imp );
+		final Settings settings = new Settings( imp );
 		settings.tstart = 10;
 		settings.tend = 50;
 		settings.detectorFactory = new IlastikDetectorFactory<>();
