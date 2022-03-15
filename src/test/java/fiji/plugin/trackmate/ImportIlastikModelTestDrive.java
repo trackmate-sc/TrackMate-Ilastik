@@ -92,6 +92,5 @@ public class ImportIlastikModelTestDrive
 			final List< Map< String, String > > deserialize = context.deserialize( str, List.class );
 			return Collections.singletonMap( AXES_KEY, deserialize );
 		}
-
 	}
 }
