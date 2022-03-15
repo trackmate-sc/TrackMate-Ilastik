@@ -268,9 +268,8 @@ public class IlastikRunner
 	private static final int getModelNChannel( final String path )
 	{
 		final IHDF5Reader reader = HDF5Factory.openForReading( new File( path ) );
-
 		final HDF5ObjectInformation info = reader.object().getObjectInformation( HDF_PATH_AXISTAGS );
-		if ( !info.isDataSet() )
+		if ( !info.exists() )
 			return 1; // assume there is only 1 channel
 
 		final String str = reader.readString( HDF_PATH_AXISTAGS );
