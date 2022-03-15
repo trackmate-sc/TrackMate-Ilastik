@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.ilastik;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -303,6 +304,7 @@ public class IlastikRunner
 
 	private static final String HDF_PATH_SHAPE = "/Input Data/infos/lane0000/Raw Data/shape";
 
+
 	private static final Gson createJSon()
 	{
 		return new GsonBuilder()
@@ -322,4 +324,17 @@ public class IlastikRunner
 			return Collections.singletonMap( AXES_KEY, deserialize );
 		}
 	}
+
+	public static List< String > getClassLabels( final String path )
+	{
+		final IHDF5Reader reader = HDF5Factory.openForReading( new File( path ) );
+		final HDF5ObjectInformation info = reader.object().getObjectInformation( HDF_PATH_LABELNAMES );
+		if ( !info.exists() )
+			return null; // We failed to read.
+
+		final String[] arr = reader.readStringArray( HDF_PATH_LABELNAMES );
+		return Arrays.asList( arr );
+	}
+
+	private static final String HDF_PATH_LABELNAMES = "/PixelClassification/LabelNames";
 }
