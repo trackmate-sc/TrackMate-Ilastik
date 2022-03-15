@@ -270,6 +270,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabelLogger labelLogger = new JLabelLogger();
 		final GridBagConstraints gbc_labelLogger = new GridBagConstraints();
+		gbc_labelLogger.fill = GridBagConstraints.HORIZONTAL;
 		gbc_labelLogger.gridwidth = 3;
 		gbc_labelLogger.gridx = 0;
 		gbc_labelLogger.gridy = 10;
