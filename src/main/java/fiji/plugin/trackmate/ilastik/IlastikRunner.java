@@ -62,7 +62,6 @@ import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 public class IlastikRunner
@@ -158,16 +157,11 @@ public class IlastikRunner
 		 * Properly set the image to process: crop it.
 		 */
 
-		System.out.println( Util.printInterval( extendedInterval ) ); // DEBUG
-		System.out.println( Util.printInterval( input ) ); // DEBUG
-
 		final RandomAccessibleInterval< T > crop = Views.interval( input, extendedInterval );
 		final RandomAccessibleInterval< T > zeroMinCrop = Views.zeroMin( crop );
 
 		final ImgPlus< T > cropped = new ImgPlus<>( ImgView.wrap( zeroMinCrop, input.factory() ) );
 		MetadataUtil.copyImgPlusMetadata( input, cropped );
-
-		System.out.println( Util.printInterval( cropped ) ); // DEBUG
 
 		/*
 		 * Discover and use Ilastik config.
