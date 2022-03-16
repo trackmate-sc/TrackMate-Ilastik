@@ -64,8 +64,9 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 	 *            possibly multiple channels.
 	 * @param interval
 	 *            the interval on which to operate.
-	 * @param calibration
-	 *            the pixel sizes.
+	 * @param channel
+	 *            the channel in the source image on which to operate when a
+	 *            model trained on a single channel is specified.
 	 * @param classifierPath
 	 *            the path to the ilastik project containing the classifier.
 	 * @param classIndex

@@ -90,7 +90,12 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	private final JSpinner spinner;
 
 	/**
-	 * Create the panel.
+	 * Creates the panel.
+	 * 
+	 * @param settings
+	 *            the TrackMate settings to use.
+	 * @param model
+	 *            the TrackMate model to use.
 	 */
 	public IlastikDetectorConfigurationPanel( final Settings settings, final Model model )
 	{

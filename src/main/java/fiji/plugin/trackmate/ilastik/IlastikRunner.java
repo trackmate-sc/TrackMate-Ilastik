@@ -71,9 +71,28 @@ public class IlastikRunner
 	private final static Context context = TMUtils.getContext();
 
 	/**
+	 * Executes the ilastik process on the specified image and return the
+	 * results as a {@link SpotCollection}.
+	 * 
+	 * @param img
+	 *            the source image.
+	 * @param interval
+	 *            the interval (space and time) to operate on.
+	 * @param channel
+	 *            the channel to operate on when a model trained on a single
+	 *            channel is specified.
+	 * @param projectFilePath
+	 *            the path to the ilastik project containing the classifier.
+	 * @param classId
+	 *            the index of the class to extract.
+	 * @param probaThreshold
+	 *            a threshold on the probability map to extract objects.
 	 * @return a new {@link SpotCollection}
 	 * @throws IOException
-	 *             if the Ilastik file cannot be found.
+	 *             if the ilastik file cannot be found.
+	 * @param <T>
+	 *            the type of pixels in the source image. Must extend
+	 *            {@link RealType} and {@link NativeType}.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > SpotCollection run(
 			final ImgPlus< T > img,
@@ -303,7 +322,6 @@ public class IlastikRunner
 	private static final String HDF_PATH_AXISTAGS = "/Input Data/infos/lane0000/Raw Data/axistags";
 
 	private static final String HDF_PATH_SHAPE = "/Input Data/infos/lane0000/Raw Data/shape";
-
 
 	private static final Gson createJSon()
 	{
