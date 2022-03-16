@@ -48,11 +48,8 @@ import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import fiji.plugin.trackmate.detection.SpotGlobalDetectorFactory;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imglib2.Interval;
-import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
@@ -132,16 +129,16 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	@Override
 	public SpotGlobalDetector< T > getDetector( final Interval interval )
 	{
-		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final String classifierPath = ( String ) settings.get( KEY_CLASSIFIER_FILEPATH );
-		final ImgPlus< T > imFrame = prepareImg();
 		final int classIndex = ( Integer ) settings.get( KEY_CLASS_INDEX );
 		final double probaThreshold = ( Double ) settings.get( KEY_PROBA_THRESHOLD );
+		// In ImgLib2, dimensions are 0-based.
+		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
 
 		final IlastikDetector< T > detector = new IlastikDetector<>(
-				imFrame,
+				img,
 				interval,
-				calibration,
+				channel,
 				classifierPath,
 				classIndex,
 				probaThreshold );
@@ -283,28 +280,6 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	public String getName()
 	{
 		return NAME;
-	}
-
-	/**
-	 * Return 1-channel, all time-points, all-Zs if any.
-	 * 
-	 * @return an {@link ImgPlus}.
-	 */
-	protected ImgPlus< T > prepareImg()
-	{
-		final int cDim = img.dimensionIndex( Axes.CHANNEL );
-		final ImgPlus< T > imFrame;
-		if ( cDim < 0 )
-		{
-			imFrame = img;
-		}
-		else
-		{
-			// In ImgLib2, dimensions are 0-based.
-			final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
-			imFrame = ImgPlusViews.hyperSlice( img, cDim, channel );
-		}
-		return imFrame;
 	}
 
 	@Override

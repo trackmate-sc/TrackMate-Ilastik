@@ -40,8 +40,6 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 
 	protected final Interval interval;
 
-	protected final double[] calibration;
-
 	protected final String classifierPath;
 
 	protected final int classIndex;
@@ -56,17 +54,36 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 
 	protected SpotCollection spots;
 
+	private final int channel;
+
+	/**
+	 * Instantiate an ilastik detector.
+	 * 
+	 * @param img
+	 *            source image, possibly multiple frames, possibly multiple Zs,
+	 *            possibly multiple channels.
+	 * @param interval
+	 *            the interval on which to operate.
+	 * @param calibration
+	 *            the pixel sizes.
+	 * @param classifierPath
+	 *            the path to the ilastik project containing the classifier.
+	 * @param classIndex
+	 *            the index of the class to extract.
+	 * @param probaThreshold
+	 *            a threshold on the probability map to extract objects.
+	 */
 	public IlastikDetector(
 			final ImgPlus< T > img,
 			final Interval interval,
-			final double[] calibration,
+			final int channel,
 			final String classifierPath,
 			final int classIndex,
 			final double probaThreshold )
 	{
 		this.img = img;
 		this.interval = interval;
-		this.calibration = calibration;
+		this.channel = channel;
 		this.classifierPath = classifierPath;
 		this.classIndex = classIndex;
 		this.probaThreshold = probaThreshold;
@@ -87,7 +104,7 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 			spots = IlastikRunner.run(
 					img,
 					interval,
-					calibration,
+					channel,
 					classifierPath,
 					classIndex,
 					probaThreshold );

@@ -40,13 +40,17 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextField;
+import javax.swing.SpinnerListModel;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -75,8 +79,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	private final JSlider sliderChannel;
 
-	private final JSlider sliderClassId;
-
 	private final JTextField modelFileTextField;
 
 	private final JButton btnBrowse;
@@ -84,6 +86,8 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	private final JFormattedTextField ftfProbaThreshold;
 
 	protected final PrefService prefService;
+
+	private final JSpinner spinner;
 
 	/**
 	 * Create the panel.
@@ -102,24 +106,24 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabel lblSettingsForDetector = new JLabel( "Settings for detector:" );
 		lblSettingsForDetector.setFont( FONT );
-		final GridBagConstraints gbc_lblSettingsForDetector = new GridBagConstraints();
-		gbc_lblSettingsForDetector.gridwidth = 3;
-		gbc_lblSettingsForDetector.insets = new Insets( 5, 5, 5, 0 );
-		gbc_lblSettingsForDetector.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblSettingsForDetector.gridx = 0;
-		gbc_lblSettingsForDetector.gridy = 0;
-		add( lblSettingsForDetector, gbc_lblSettingsForDetector );
+		final GridBagConstraints gbcLblSettingsForDetector = new GridBagConstraints();
+		gbcLblSettingsForDetector.gridwidth = 3;
+		gbcLblSettingsForDetector.insets = new Insets( 5, 5, 5, 0 );
+		gbcLblSettingsForDetector.fill = GridBagConstraints.HORIZONTAL;
+		gbcLblSettingsForDetector.gridx = 0;
+		gbcLblSettingsForDetector.gridy = 0;
+		add( lblSettingsForDetector, gbcLblSettingsForDetector );
 
 		final JLabel lblDetector = new JLabel( TITLE, ICON, JLabel.RIGHT );
 		lblDetector.setFont( BIG_FONT );
 		lblDetector.setHorizontalAlignment( SwingConstants.CENTER );
-		final GridBagConstraints gbc_lblDetector = new GridBagConstraints();
-		gbc_lblDetector.gridwidth = 3;
-		gbc_lblDetector.insets = new Insets( 5, 5, 5, 0 );
-		gbc_lblDetector.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblDetector.gridx = 0;
-		gbc_lblDetector.gridy = 1;
-		add( lblDetector, gbc_lblDetector );
+		final GridBagConstraints gbcLblDetector = new GridBagConstraints();
+		gbcLblDetector.gridwidth = 3;
+		gbcLblDetector.insets = new Insets( 5, 5, 5, 0 );
+		gbcLblDetector.fill = GridBagConstraints.HORIZONTAL;
+		gbcLblDetector.gridx = 0;
+		gbcLblDetector.gridy = 1;
+		add( lblDetector, gbcLblDetector );
 
 		/*
 		 * Help text.
@@ -129,14 +133,14 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 				.replace( "<p>", "<p align=\"justify\">" )
 				.replace( "<html>", "<html><p align=\"justify\">" ) );
 		lblHelptext.setFont( FONT.deriveFont( Font.ITALIC ) );
-		final GridBagConstraints gbc_lblHelptext = new GridBagConstraints();
-		gbc_lblHelptext.anchor = GridBagConstraints.NORTH;
-		gbc_lblHelptext.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblHelptext.gridwidth = 3;
-		gbc_lblHelptext.insets = new Insets( 5, 10, 5, 10 );
-		gbc_lblHelptext.gridx = 0;
-		gbc_lblHelptext.gridy = 2;
-		add( lblHelptext, gbc_lblHelptext );
+		final GridBagConstraints gbcLblHelptext = new GridBagConstraints();
+		gbcLblHelptext.anchor = GridBagConstraints.NORTH;
+		gbcLblHelptext.fill = GridBagConstraints.HORIZONTAL;
+		gbcLblHelptext.gridwidth = 3;
+		gbcLblHelptext.insets = new Insets( 5, 10, 5, 10 );
+		gbcLblHelptext.gridx = 0;
+		gbcLblHelptext.gridy = 2;
+		add( lblHelptext, gbcLblHelptext );
 
 		/*
 		 * Channel selector.
@@ -144,29 +148,29 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabel lblSegmentInChannel = new JLabel( "Segment in channel:" );
 		lblSegmentInChannel.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_lblSegmentInChannel = new GridBagConstraints();
-		gbc_lblSegmentInChannel.anchor = GridBagConstraints.EAST;
-		gbc_lblSegmentInChannel.insets = new Insets( 5, 5, 5, 5 );
-		gbc_lblSegmentInChannel.gridx = 0;
-		gbc_lblSegmentInChannel.gridy = 3;
-		add( lblSegmentInChannel, gbc_lblSegmentInChannel );
+		final GridBagConstraints gbcLblSegmentInChannel = new GridBagConstraints();
+		gbcLblSegmentInChannel.anchor = GridBagConstraints.EAST;
+		gbcLblSegmentInChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblSegmentInChannel.gridx = 0;
+		gbcLblSegmentInChannel.gridy = 3;
+		add( lblSegmentInChannel, gbcLblSegmentInChannel );
 
 		sliderChannel = new JSlider();
-		final GridBagConstraints gbc_sliderChannel = new GridBagConstraints();
-		gbc_sliderChannel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_sliderChannel.insets = new Insets( 5, 5, 5, 5 );
-		gbc_sliderChannel.gridx = 1;
-		gbc_sliderChannel.gridy = 3;
-		add( sliderChannel, gbc_sliderChannel );
+		final GridBagConstraints gbcSliderChannel = new GridBagConstraints();
+		gbcSliderChannel.fill = GridBagConstraints.HORIZONTAL;
+		gbcSliderChannel.insets = new Insets( 5, 5, 5, 5 );
+		gbcSliderChannel.gridx = 1;
+		gbcSliderChannel.gridy = 3;
+		add( sliderChannel, gbcSliderChannel );
 
 		final JLabel labelChannel = new JLabel( "1" );
 		labelChannel.setHorizontalAlignment( SwingConstants.CENTER );
 		labelChannel.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_labelChannel = new GridBagConstraints();
-		gbc_labelChannel.insets = new Insets( 5, 5, 5, 0 );
-		gbc_labelChannel.gridx = 2;
-		gbc_labelChannel.gridy = 3;
-		add( labelChannel, gbc_labelChannel );
+		final GridBagConstraints gbcLabelChannel = new GridBagConstraints();
+		gbcLabelChannel.insets = new Insets( 5, 5, 5, 0 );
+		gbcLabelChannel.gridx = 2;
+		gbcLabelChannel.gridy = 3;
+		add( labelChannel, gbcLabelChannel );
 
 		sliderChannel.addChangeListener( l -> labelChannel.setText( "" + sliderChannel.getValue() ) );
 
@@ -176,32 +180,32 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabel lblCusstomModelFile = new JLabel( "ilastik file:" );
 		lblCusstomModelFile.setFont( FONT );
-		final GridBagConstraints gbc_lblCusstomModelFile = new GridBagConstraints();
-		gbc_lblCusstomModelFile.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblCusstomModelFile.insets = new Insets( 0, 5, 0, 5 );
-		gbc_lblCusstomModelFile.gridx = 0;
-		gbc_lblCusstomModelFile.gridy = 4;
-		add( lblCusstomModelFile, gbc_lblCusstomModelFile );
+		final GridBagConstraints gbcLblCusstomModelFile = new GridBagConstraints();
+		gbcLblCusstomModelFile.anchor = GridBagConstraints.SOUTHWEST;
+		gbcLblCusstomModelFile.insets = new Insets( 0, 5, 5, 5 );
+		gbcLblCusstomModelFile.gridx = 0;
+		gbcLblCusstomModelFile.gridy = 4;
+		add( lblCusstomModelFile, gbcLblCusstomModelFile );
 
 		btnBrowse = new JButton( "Browse" );
 		btnBrowse.setFont( FONT );
-		final GridBagConstraints gbc_btnBrowse = new GridBagConstraints();
-		gbc_btnBrowse.insets = new Insets( 5, 0, 0, 5 );
-		gbc_btnBrowse.anchor = GridBagConstraints.SOUTHEAST;
-		gbc_btnBrowse.gridwidth = 2;
-		gbc_btnBrowse.gridx = 1;
-		gbc_btnBrowse.gridy = 4;
-		add( btnBrowse, gbc_btnBrowse );
+		final GridBagConstraints gbcBtnBrowse = new GridBagConstraints();
+		gbcBtnBrowse.insets = new Insets( 5, 0, 5, 0 );
+		gbcBtnBrowse.anchor = GridBagConstraints.SOUTHEAST;
+		gbcBtnBrowse.gridwidth = 2;
+		gbcBtnBrowse.gridx = 1;
+		gbcBtnBrowse.gridy = 4;
+		add( btnBrowse, gbcBtnBrowse );
 
 		modelFileTextField = new JTextField( "" );
 		modelFileTextField.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 3;
-		gbc_textField.insets = new Insets( 0, 5, 5, 5 );
-		gbc_textField.fill = GridBagConstraints.BOTH;
-		gbc_textField.gridx = 0;
-		gbc_textField.gridy = 5;
-		add( modelFileTextField, gbc_textField );
+		final GridBagConstraints gbcTextField = new GridBagConstraints();
+		gbcTextField.gridwidth = 3;
+		gbcTextField.insets = new Insets( 0, 5, 5, 0 );
+		gbcTextField.fill = GridBagConstraints.BOTH;
+		gbcTextField.gridx = 0;
+		gbcTextField.gridy = 5;
+		add( modelFileTextField, gbcTextField );
 		modelFileTextField.setColumns( 10 );
 
 		/*
@@ -210,35 +214,23 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabel lblClassId = new JLabel( "Class index:" );
 		lblClassId.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_lblOverlapThreshold = new GridBagConstraints();
-		gbc_lblOverlapThreshold.anchor = GridBagConstraints.EAST;
-		gbc_lblOverlapThreshold.insets = new Insets( 5, 5, 5, 5 );
-		gbc_lblOverlapThreshold.gridx = 0;
-		gbc_lblOverlapThreshold.gridy = 6;
-		add( lblClassId, gbc_lblOverlapThreshold );
+		final GridBagConstraints gbcLblOverlapThreshold = new GridBagConstraints();
+		gbcLblOverlapThreshold.anchor = GridBagConstraints.EAST;
+		gbcLblOverlapThreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblOverlapThreshold.gridx = 0;
+		gbcLblOverlapThreshold.gridy = 6;
+		add( lblClassId, gbcLblOverlapThreshold );
 
-		sliderClassId = new JSlider();
-		final GridBagConstraints gbc_sliderClassId = new GridBagConstraints();
-		gbc_sliderClassId.fill = GridBagConstraints.HORIZONTAL;
-		gbc_sliderClassId.insets = new Insets( 0, 0, 5, 5 );
-		gbc_sliderClassId.gridx = 1;
-		gbc_sliderClassId.gridy = 6;
-		add( sliderClassId, gbc_sliderClassId );
-
-		final JLabel labelClassId = new JLabel( "1" );
-		labelClassId.setHorizontalAlignment( SwingConstants.CENTER );
-		labelClassId.setFont( new Font( "Arial", Font.PLAIN, 10 ) );
-		final GridBagConstraints gbc_labelClassId = new GridBagConstraints();
-		gbc_labelClassId.insets = new Insets( 0, 0, 5, 0 );
-		gbc_labelClassId.gridx = 2;
-		gbc_labelClassId.gridy = 6;
-		add( labelClassId, gbc_labelClassId );
-
-		sliderClassId.addChangeListener( l -> labelClassId.setText( "" + sliderClassId.getValue() ) );
-		// We don't know yet how many classes we have. Let's put 10 for now.
-		sliderClassId.setMaximum( 10 );
-		sliderClassId.setMinimum( 1 );
-		sliderClassId.setValue( 1 );
+		spinner = new JSpinner( new SpinnerListModel() );
+		final DefaultEditor editor = new JSpinner.DefaultEditor( spinner );
+		editor.getTextField().setHorizontalAlignment( JTextField.CENTER );
+		spinner.setEditor( editor );
+		final GridBagConstraints gbcSpinner = new GridBagConstraints();
+		gbcSpinner.fill = GridBagConstraints.HORIZONTAL;
+		gbcSpinner.insets = new Insets( 5, 5, 5, 5 );
+		gbcSpinner.gridx = 1;
+		gbcSpinner.gridy = 6;
+		add( spinner, gbcSpinner );
 
 		/*
 		 * Proba threshold.
@@ -246,34 +238,35 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JLabel lblScoreTreshold = new JLabel( "Threshold on probability:" );
 		lblScoreTreshold.setFont( SMALL_FONT );
-		final GridBagConstraints gbc_lblScoreTreshold = new GridBagConstraints();
-		gbc_lblScoreTreshold.anchor = GridBagConstraints.EAST;
-		gbc_lblScoreTreshold.insets = new Insets( 5, 5, 5, 5 );
-		gbc_lblScoreTreshold.gridx = 0;
-		gbc_lblScoreTreshold.gridy = 7;
-		add( lblScoreTreshold, gbc_lblScoreTreshold );
+		final GridBagConstraints gbcLblScoreTreshold = new GridBagConstraints();
+		gbcLblScoreTreshold.anchor = GridBagConstraints.EAST;
+		gbcLblScoreTreshold.insets = new Insets( 5, 5, 5, 5 );
+		gbcLblScoreTreshold.gridx = 0;
+		gbcLblScoreTreshold.gridy = 7;
+		add( lblScoreTreshold, gbcLblScoreTreshold );
 
 		ftfProbaThreshold = new JFormattedTextField( THRESHOLD_FORMAT );
 		ftfProbaThreshold.setFont( SMALL_FONT );
 		ftfProbaThreshold.setMinimumSize( new Dimension( 60, 20 ) );
 		ftfProbaThreshold.setHorizontalAlignment( SwingConstants.CENTER );
-		final GridBagConstraints gbc_score = new GridBagConstraints();
-		gbc_score.fill = GridBagConstraints.HORIZONTAL;
-		gbc_score.insets = new Insets( 5, 5, 5, 5 );
-		gbc_score.gridx = 1;
-		gbc_score.gridy = 7;
-		add( ftfProbaThreshold, gbc_score );
+		final GridBagConstraints gbcScore = new GridBagConstraints();
+		gbcScore.fill = GridBagConstraints.HORIZONTAL;
+		gbcScore.insets = new Insets( 5, 5, 5, 5 );
+		gbcScore.gridx = 1;
+		gbcScore.gridy = 7;
+		add( ftfProbaThreshold, gbcScore );
 
 		/*
 		 * Logger.
 		 */
 
 		final JLabelLogger labelLogger = new JLabelLogger();
-		final GridBagConstraints gbc_labelLogger = new GridBagConstraints();
-		gbc_labelLogger.gridwidth = 3;
-		gbc_labelLogger.gridx = 0;
-		gbc_labelLogger.gridy = 10;
-		add( labelLogger, gbc_labelLogger );
+		final GridBagConstraints gbcLabelLogger = new GridBagConstraints();
+		gbcLabelLogger.fill = GridBagConstraints.HORIZONTAL;
+		gbcLabelLogger.gridwidth = 3;
+		gbcLabelLogger.gridx = 0;
+		gbcLabelLogger.gridy = 10;
+		add( labelLogger, gbcLabelLogger );
 		final Logger localLogger = labelLogger.getLogger();
 
 		/*
@@ -282,13 +275,13 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final JButton btnPreview = new JButton( "Preview", PREVIEW_ICON );
 		btnPreview.setFont( FONT );
-		final GridBagConstraints gbc_btnPreview = new GridBagConstraints();
-		gbc_btnPreview.gridwidth = 2;
-		gbc_btnPreview.anchor = GridBagConstraints.SOUTHEAST;
-		gbc_btnPreview.insets = new Insets( 5, 5, 5, 5 );
-		gbc_btnPreview.gridx = 1;
-		gbc_btnPreview.gridy = 9;
-		add( btnPreview, gbc_btnPreview );
+		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
+		gbcBtnPreview.gridwidth = 2;
+		gbcBtnPreview.anchor = GridBagConstraints.SOUTHEAST;
+		gbcBtnPreview.insets = new Insets( 5, 5, 5, 0 );
+		gbcBtnPreview.gridx = 1;
+		gbcBtnPreview.gridy = 9;
+		add( btnPreview, gbcBtnPreview );
 
 		/*
 		 * Listeners and specificities.
@@ -344,7 +337,8 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		settings.put( KEY_CLASSIFIER_FILEPATH, modelFileTextField.getText() );
 
-		final int classID = sliderClassId.getValue() - 1;
+		final SpinnerListModel model = ( SpinnerListModel ) spinner.getModel();
+		final int classID = model.getList().indexOf( spinner.getValue() );
 		settings.put( KEY_CLASS_INDEX, classID );
 
 		final double probaThreshold = ( ( Number ) ftfProbaThreshold.getValue() ).doubleValue();
@@ -355,14 +349,20 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	@Override
 	public void setSettings( final Map< String, Object > settings )
 	{
-		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
-		sliderClassId.setValue( ( Integer ) settings.get( KEY_CLASS_INDEX ) + 1 );
-		ftfProbaThreshold.setValue( settings.get( KEY_PROBA_THRESHOLD ) );
-		
 		String filePath = ( String ) settings.get( KEY_CLASSIFIER_FILEPATH );
 		if ( filePath == null || filePath.isEmpty() )
 			filePath = prefService.get( IlastikDetectorConfigurationPanel.class, KEY_CLASSIFIER_FILEPATH );
 		modelFileTextField.setText( filePath );
+
+		sliderChannel.setValue( ( Integer ) settings.get( KEY_TARGET_CHANNEL ) );
+
+		refreshLabelNames();
+		final SpinnerListModel model = ( SpinnerListModel ) spinner.getModel();
+		final int classID = ( Integer ) settings.get( KEY_CLASS_INDEX );
+		spinner.setValue( model.getList().get( classID ) );
+
+		ftfProbaThreshold.setValue( settings.get( KEY_PROBA_THRESHOLD ) );
+
 	}
 
 	@Override
@@ -386,11 +386,36 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 			{
 				modelFileTextField.setText( file.getAbsolutePath() );
 				prefService.put( IlastikDetectorConfigurationPanel.class, KEY_CLASSIFIER_FILEPATH, file.getAbsolutePath() );
+				refreshLabelNames();
 			}
 		}
 		finally
 		{
 			btnBrowse.setEnabled( true );
 		}
+	}
+
+	private void refreshLabelNames()
+	{
+		final String path = modelFileTextField.getText();
+		// Store current selection index.
+		final int currentIndex = ( ( SpinnerListModel ) spinner.getModel() )
+				.getList().indexOf( spinner.getValue() );
+
+		// Get new list of labels.
+		final List< String > classLabels = IlastikRunner.getClassLabels( path );
+		if ( classLabels == null || classLabels.isEmpty() )
+			return;
+
+		// Regen model.
+		final SpinnerListModel spinnerModel = new SpinnerListModel( classLabels );
+		spinner.setModel( spinnerModel );
+		if ( currentIndex >= 0 && currentIndex < classLabels.size() )
+			spinnerModel.setValue( classLabels.get( currentIndex ) );
+
+		// Regen UI.
+		final JFormattedTextField tf = ( ( JSpinner.DefaultEditor ) spinner.getEditor() ).getTextField();
+		tf.revalidate();
+		tf.repaint();
 	}
 }

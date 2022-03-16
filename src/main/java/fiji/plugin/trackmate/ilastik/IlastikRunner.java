@@ -23,7 +23,10 @@ package fiji.plugin.trackmate.ilastik;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.ilastik.ilastik4ij.executors.AbstractIlastikExecutor.PixelPredictionType;
 import org.ilastik.ilastik4ij.executors.PixelClassification;
@@ -33,6 +36,17 @@ import org.scijava.app.StatusService;
 import org.scijava.log.LogService;
 import org.scijava.options.OptionsService;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+
+import ch.systemsx.cisd.hdf5.HDF5Factory;
+import ch.systemsx.cisd.hdf5.HDF5ObjectInformation;
+import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.DetectionUtils;
@@ -41,11 +55,13 @@ import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.ops.MetadataUtil;
+import net.imglib2.FinalInterval;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.ImgView;
 import net.imglib2.img.display.imagej.ImgPlusViews;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
 
@@ -60,13 +76,79 @@ public class IlastikRunner
 	 *             if the Ilastik file cannot be found.
 	 */
 	public static < T extends RealType< T > & NativeType< T > > SpotCollection run(
-			final ImgPlus< T > input,
+			final ImgPlus< T > img,
 			final Interval interval,
-			final double[] calibration,
+			final int channel,
 			final String projectFilePath,
 			final long classId,
 			final double probaThreshold ) throws IOException
 	{
+		/*
+		 * Investigate whether the ilastik model is built on a single channel or
+		 * on multiple channels.
+		 */
+
+		final ImgPlus< T > input;
+		final Interval extendedInterval;
+		final int modelNChannel = getModelNChannel( projectFilePath );
+		if ( modelNChannel > 1 )
+		{
+			/*
+			 * The model was trained on images with more that one channel. In
+			 * that case we assume that the image to perform inference has the
+			 * same number of channel with the same order, and we pass it whole
+			 * to ilastik.
+			 */
+			input = img;
+			final long[] min = new long[ input.numDimensions() ];
+			final long[] max = new long[ input.numDimensions() ];
+			// Source interval is always x, y, z (if any), t.
+			int axisidSource = 0;
+			int axisidTarget = 0;
+			// X
+			min[ axisidSource ] = interval.min( axisidTarget );
+			max[ axisidSource ] = interval.max( axisidTarget );
+			// Y
+			axisidSource++;
+			axisidTarget++;
+			min[ axisidSource ] = interval.min( axisidTarget );
+			max[ axisidSource ] = interval.max( axisidTarget );
+			// Z.
+			if ( img.dimensionIndex( Axes.Z ) >= 0 )
+			{
+				axisidSource++;
+				axisidTarget++;
+				min[ axisidSource ] = interval.min( axisidTarget );
+				max[ axisidSource ] = interval.max( axisidTarget );
+			}
+			// C - not present in the source interval.
+			final int caxis = img.dimensionIndex( Axes.CHANNEL );
+			if ( caxis >= 0 )
+			{
+				// If we do not have channel axis here, we are screwed anyway.
+				axisidSource++;
+				min[ axisidSource ] = img.min( caxis );
+				max[ axisidSource ] = img.max( caxis );
+			}
+			// T
+			axisidSource++;
+			axisidTarget++;
+			min[ axisidSource ] = interval.min( axisidTarget );
+			max[ axisidSource ] = interval.max( axisidTarget );
+
+			extendedInterval = FinalInterval.wrap( min, max );
+		}
+		else
+		{
+			/*
+			 * The model was trained on images with one channel. In that case we
+			 * make it possible to apply it on one of the channel of the
+			 * possibly multi-channel input image. We extract the channel
+			 * specified by the user and pass it to ilastik.
+			 */
+			input = prepareImg( img, channel );
+			extendedInterval = interval;
+		}
 
 		final LogService logService = context.getService( LogService.class );
 		final StatusService statusService = context.getService( StatusService.class );
@@ -76,7 +158,7 @@ public class IlastikRunner
 		 * Properly set the image to process: crop it.
 		 */
 
-		final RandomAccessibleInterval< T > crop = Views.interval( input, interval );
+		final RandomAccessibleInterval< T > crop = Views.interval( input, extendedInterval );
 		final RandomAccessibleInterval< T > zeroMinCrop = Views.zeroMin( crop );
 
 		final ImgPlus< T > cropped = new ImgPlus<>( ImgView.wrap( zeroMinCrop, input.factory() ) );
@@ -105,7 +187,6 @@ public class IlastikRunner
 				maxRamMb );
 		final PixelPredictionType predictionType = PixelPredictionType.Probabilities;
 
-
 		final ImgPlus< T > output = classifier.classifyPixels( cropped, predictionType );
 		final ImgPlus< T > proba = ImgPlusViews.hyperSlice( output, output.dimensionIndex( Axes.CHANNEL ), classId );
 
@@ -113,9 +194,10 @@ public class IlastikRunner
 		 * Create ROIs from proba.
 		 */
 
+		final double[] calibration = TMUtils.getSpatialCalibration( img );
 		final SpotCollection spots = new SpotCollection();
 		final int timeIndex = proba.dimensionIndex( Axes.TIME );
-		final int t0 = interval.numDimensions() > 2 ? ( int ) interval.min( 2 ) : 0;
+		final int t0 = extendedInterval.numDimensions() > 2 ? ( int ) extendedInterval.min( 2 ) : 0;
 		for ( int t = 0; t < proba.dimension( timeIndex ); t++ )
 		{
 			final List< Spot > spotsThisFrame;
@@ -130,10 +212,10 @@ public class IlastikRunner
 				spotsThisFrame = MaskUtils.fromThresholdWithROI(
 						probaThisFrame,
 						probaThisFrame,
-						calibration, 
-						probaThreshold, 
-						simplify, 
-						numThreads, 
+						calibration,
+						probaThreshold,
+						simplify,
+						numThreads,
 						probaThisFrame );
 			}
 			else
@@ -160,7 +242,7 @@ public class IlastikRunner
 				for ( int d = 0; d < maxD; d++ )
 				{
 					final double pos = spot.getDoublePosition( d );
-					final double newPos = pos + interval.min( d ) * calibration[ d ];
+					final double newPos = pos + extendedInterval.min( d ) * calibration[ d ];
 					spot.putFeature( Spot.POSITION_FEATURES[ d ], newPos );
 				}
 			}
@@ -169,4 +251,90 @@ public class IlastikRunner
 		}
 		return spots;
 	}
+
+	/**
+	 * Return 1-channel, all time-points, all-Zs if any.
+	 * 
+	 * @return an {@link ImgPlus}.
+	 */
+	private static < T extends Type< T > > ImgPlus< T > prepareImg( final ImgPlus< T > img, final int channel )
+	{
+		final int cDim = img.dimensionIndex( Axes.CHANNEL );
+		if ( cDim < 0 )
+			return img;
+		else
+			return ImgPlusViews.hyperSlice( img, cDim, channel );
+	}
+
+	private static final int getModelNChannel( final String path )
+	{
+		final IHDF5Reader reader = HDF5Factory.openForReading( new File( path ) );
+		final HDF5ObjectInformation info = reader.object().getObjectInformation( HDF_PATH_AXISTAGS );
+		if ( !info.exists() )
+			return 1; // assume there is only 1 channel
+
+		final String str = reader.readString( HDF_PATH_AXISTAGS );
+		@SuppressWarnings( "unchecked" )
+		final Map< String, List< Map< String, String > > > map = createJSon().fromJson( str, Map.class );
+		final List< Map< String, String > > axesList = map.get( "axes" );
+		int channelAxis = -1;
+		for ( int i = 0; i < axesList.size(); i++ )
+		{
+			final Map< String, String > axesAttributes = axesList.get( i );
+			final String axisStr = axesAttributes.get( AXIS_KEY_KEY );
+			if ( CHANNEL_AXIS_NAME.equals( axisStr ) )
+			{
+				channelAxis = i;
+				break;
+			}
+		}
+		if ( channelAxis < 0 )
+			return 1;
+		final int[] shape = reader.readIntArray( HDF_PATH_SHAPE );
+		return shape[ channelAxis ];
+	}
+
+	private static final String AXES_KEY = "axes";
+
+	private static final String AXIS_KEY_KEY = "key";
+
+	private static final String CHANNEL_AXIS_NAME = "c";
+
+	private static final String HDF_PATH_AXISTAGS = "/Input Data/infos/lane0000/Raw Data/axistags";
+
+	private static final String HDF_PATH_SHAPE = "/Input Data/infos/lane0000/Raw Data/shape";
+
+
+	private static final Gson createJSon()
+	{
+		return new GsonBuilder()
+				.registerTypeAdapter( Map.class, new IlastikAxisMapAdapter() )
+				.create();
+	}
+
+	private static class IlastikAxisMapAdapter implements JsonDeserializer< Map< String, List< Map< String, String > > > >
+	{
+
+		@Override
+		public Map< String, List< Map< String, String > > > deserialize( final JsonElement json, final java.lang.reflect.Type typeOfT, final JsonDeserializationContext context ) throws JsonParseException
+		{
+			final JsonObject obj = json.getAsJsonObject();
+			final JsonElement str = obj.get( AXES_KEY );
+			final List< Map< String, String > > deserialize = context.deserialize( str, List.class );
+			return Collections.singletonMap( AXES_KEY, deserialize );
+		}
+	}
+
+	public static List< String > getClassLabels( final String path )
+	{
+		final IHDF5Reader reader = HDF5Factory.openForReading( new File( path ) );
+		final HDF5ObjectInformation info = reader.object().getObjectInformation( HDF_PATH_LABELNAMES );
+		if ( !info.exists() )
+			return null; // We failed to read.
+
+		final String[] arr = reader.readStringArray( HDF_PATH_LABELNAMES );
+		return Arrays.asList( arr );
+	}
+
+	private static final String HDF_PATH_LABELNAMES = "/PixelClassification/LabelNames";
 }

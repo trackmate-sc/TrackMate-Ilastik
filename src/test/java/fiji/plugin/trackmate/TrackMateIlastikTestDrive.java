@@ -33,7 +33,8 @@ public class TrackMateIlastikTestDrive
 	{
 		final ImageJ ij = new ImageJ();
 		ij.launch( args );
-		final String path = "D:\\Projects\\NVerttiQuintero\\Data\\Series014b.tif";
+//		final String path = "D:\\Projects\\NVerttiQuintero\\Data\\Series014b.tif";
+		final String path = "D:\\Projects\\LLeBlanc\\Data\\201125_Proliferation_2C43-PilQmCherry-HupmRhubarb-II4_100X_timestep5min_Stage3_reg.tif";
 //		"D:/Projects/NVerttiQuintero/Data/Series014b.tif"
 		final Dataset dataset = ( Dataset ) ij.io().open( path );
 		ij.ui().show( dataset );
