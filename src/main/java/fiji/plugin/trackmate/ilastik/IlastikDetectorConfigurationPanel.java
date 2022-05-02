@@ -217,7 +217,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		 * Class index.
 		 */
 
-		final JLabel lblClassId = new JLabel( "Class index:" );
+		final JLabel lblClassId = new JLabel( "Segment class:" );
 		lblClassId.setFont( SMALL_FONT );
 		final GridBagConstraints gbcLblOverlapThreshold = new GridBagConstraints();
 		gbcLblOverlapThreshold.anchor = GridBagConstraints.EAST;
