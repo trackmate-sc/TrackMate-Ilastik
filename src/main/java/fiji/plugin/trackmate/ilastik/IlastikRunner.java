@@ -345,7 +345,10 @@ public class IlastikRunner
 
 	public static List< String > getClassLabels( final String path )
 	{
-		final IHDF5Reader reader = HDF5Factory.openForReading( new File( path ) );
+		final File file = new File( path );
+		if ( !file.exists() || !file.canRead() )
+			return null; // Model file not found.
+		final IHDF5Reader reader = HDF5Factory.openForReading( file );
 		final HDF5ObjectInformation info = reader.object().getObjectInformation( HDF_PATH_LABELNAMES );
 		if ( !info.exists() )
 			return null; // We failed to read.
