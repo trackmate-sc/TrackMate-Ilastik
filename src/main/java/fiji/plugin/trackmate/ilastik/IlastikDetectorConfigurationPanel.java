@@ -227,6 +227,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		add( lblClassId, gbcLblOverlapThreshold );
 
 		spinner = new JSpinner( new SpinnerListModel() );
+		spinner.setFont( SMALL_FONT );
 		final DefaultEditor editor = new JSpinner.DefaultEditor( spinner );
 		editor.getTextField().setHorizontalAlignment( JTextField.CENTER );
 		spinner.setEditor( editor );
@@ -402,25 +403,19 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	private void refreshLabelNames()
 	{
-		final String path = modelFileTextField.getText();
-		// Store current selection index.
-		final int currentIndex = ( ( SpinnerListModel ) spinner.getModel() )
-				.getList().indexOf( spinner.getValue() );
-
 		// Get new list of labels.
+		final String path = modelFileTextField.getText();
 		final List< String > classLabels = IlastikRunner.getClassLabels( path );
 		if ( classLabels == null || classLabels.isEmpty() )
 			return;
 
-		// Regen model.
-		final SpinnerListModel spinnerModel = new SpinnerListModel( classLabels );
-		spinner.setModel( spinnerModel );
-		if ( currentIndex >= 0 && currentIndex < classLabels.size() )
-			spinnerModel.setValue( classLabels.get( currentIndex ) );
+		// Store current selection index.
+		final SpinnerListModel spinnerModel = ( SpinnerListModel ) spinner.getModel();
+		final int currentIndex = spinnerModel.getList().indexOf( spinner.getValue() );
 
-		// Regen UI.
-		final JFormattedTextField tf = ( ( JSpinner.DefaultEditor ) spinner.getEditor() ).getTextField();
-		tf.revalidate();
-		tf.repaint();
+		// Regen model.
+		spinnerModel.setList( classLabels );
+		if ( currentIndex >= 0 && currentIndex < classLabels.size() )
+			spinnerModel.setValue( spinnerModel.getList().get( currentIndex ) );
 	}
 }
