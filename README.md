@@ -1,4 +1,4 @@
-[![](https://github.com/tinevez/TrackMate-Ilastik/actions/workflows/build-main.yml/badge.svg)](https://github.com/tinevez/TrackMate-Ilastik/actions/workflows/build-main.yml)
+[![Build Status](https://github.com/trackmate-sc/TrackMate-Ilastik/actions/workflows/build-main.yml/badge.svg)](https://github.com/trackmate-sc/TrackMate-Ilastik/actions/workflows/build-main.yml)
 
 # TrackMate-ilastik
 
