@@ -106,9 +106,12 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 			+ "these objects, with a quality equal to the maximal value of the "
 			+ "probability image in the cell. "
 			+ "<p>"
+			+ "Documentation for this module "
+			+ "<a href=\"https://imagej.net/plugins/trackmate/trackmate-ilastik\">on the ImageJ Wiki</a>."
+			+ "<p>"
 			+ "If you use this detector for your work, please be so kind as to "
-			+ "also cite the ilastik paper: <i>Berg, S., Kutra, D., Kroeger, T. et al. ilastik: "
-			+ "interactive machine learning for (bio)image analysis. Nat Methods 16, 1226–1232 (2019)</i>"
+			+ "also cite the ilastik paper: <a href=\"https://doi.org/10.1038/s41592-019-0582-9\">Berg, S., Kutra, D., Kroeger, T. et al. ilastik: "
+			+ "interactive machine learning for (bio)image analysis. Nat Methods 16, 1226–1232 (2019)</a>"
 			+ "</html>";
 
 	/*
