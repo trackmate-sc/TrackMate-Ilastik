@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>31.1.0</version>
+		<version>33.2.0</version>
 		<relativePath />
 	</parent>
 
@@ -61,7 +61,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/tinevez/TrackMate-Ilastik</connection>
 		<developerConnection>scm:git:git@github.com:tinevez/TrackMate-Ilastik</developerConnection>
-		<tag>HEAD</tag>
+		<tag>TrackMate-Ilastik-1.2.1</tag>
 		<url>https://github.com/tinevez/TrackMate-Ilastik</url>
 	</scm>
 	<issueManagement>
@@ -127,7 +127,7 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>TrackMate</artifactId>
-			<version>7.6.1</version>
+			<version>7.8.1-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- Ilastik & friends -->
