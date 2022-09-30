@@ -15,11 +15,11 @@
 
 	<name>TrackMate-Ilastik</name>
 	<description>TrackMate detector based on Ilastik.</description>
-	<url>https://imagej.net/TrackMate</url>
+	<url>https://github.com/trackmate-sc/TrackMate-Ilastik</url>
 	<inceptionYear>2020</inceptionYear>
 	<organization>
-		<name>Fiji</name>
-		<url>https://fiji.sc/</url>
+		<name>TrackMate</name>
+		<url>https://github.com/trackmate-sc</url>
 	</organization>
 	<licenses>
 		<license>
@@ -33,7 +33,7 @@
 		<developer>
 			<id>tinevez</id>
 			<name>Jean-Yves Tinevez</name>
-			<url>https://imagej.net/User:JeanYvesTinevez</url>
+			<url>https://imagej.net/people/tinevez</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -47,57 +47,53 @@
 	</developers>
 	<contributors>
 		<contributor>
-			<name>grrr</name>
+			<name>Curtis Rueden</name>
+			<url>https://imagej.net/people/ctrueden</url>
+			<properties><id>ctrueden</id></properties>
 		</contributor>
 	</contributors>
 
 	<mailingLists>
 		<mailingList>
 			<name>Image.sc Forum</name>
-			<archive>https://forum.image.sc/tags/trackmate</archive>
+			<archive>https://forum.image.sc/tag/trackmate</archive>
 		</mailingList>
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://github.com/tinevez/TrackMate-Ilastik</connection>
-		<developerConnection>scm:git:git@github.com:tinevez/TrackMate-Ilastik</developerConnection>
-		<tag>TrackMate-Ilastik-1.2.1</tag>
-		<url>https://github.com/tinevez/TrackMate-Ilastik</url>
+		<connection>scm:git:https://github.com/trackmate-sc/TrackMate-Ilastik</connection>
+		<developerConnection>scm:git:git@github.com:trackmate-sc/TrackMate-Ilastik</developerConnection>
+		<tag>HEAD</tag>
+		<url>https://github.com/trackmate-sc/TrackMate-Ilastik</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/tinevez/TrackMate-Ilastik/issues</url>
+		<url>https://github.com/trackmate-sc/TrackMate-Ilastik/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/tinevez/TrackMate-Ilastik/actions</url>
+		<url>https://github.com/trackmate-sc/TrackMate-Ilastik</url>
 	</ciManagement>
 
 	<properties>
 		<package-name>fiji.plugin.trackmate</package-name>
 		<license.licenseName>gpl_v3</license.licenseName>
-		<license.copyrightOwners>The Institut Pasteur.</license.copyrightOwners>
-		<license.projectName>Fiji distribution of ImageJ for the life sciences.</license.projectName>
+		<license.copyrightOwners>TrackMate developers.</license.copyrightOwners>
+		<license.projectName>TrackMate: your buddy for everyday tracking.</license.projectName>
+
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
+
+		<ilastik4j.version>1.8.0</ilastik4j.version>
+		<javaGeom.version>0.11.1</javaGeom.version>
 	</properties>
 
-	<repositories>
-		<repository>
-			<id>scijava.public</id>
-			<url>https://maven.scijava.org/content/groups/public</url>
-		</repository>
-	</repositories>
-
 	<dependencies>
-	
-		<!-- Fiji dependencies -->
+		<!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 		</dependency>
-		
-		<!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>imagej-deprecated</artifactId>
@@ -122,32 +118,36 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
 		</dependency>
-		
-		<!-- TrackMate -->
+
+		<!-- Other dependencies -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>TrackMate</artifactId>
 			<version>7.8.1-SNAPSHOT</version>
 		</dependency>
-		
-		<!-- Ilastik & friends -->
 		<dependency>
-		    <groupId>org.ilastik</groupId>
-			<artifactId>ilastik4ij</artifactId>
-			<version>1.8.0</version>
+			<groupId>math.geom2d</groupId>
+			<artifactId>javaGeom</artifactId>
+			<version>${javaGeom.version}</version>
 		</dependency>
-	
+		<dependency>
+			<groupId>org.ilastik</groupId>
+			<artifactId>ilastik4ij</artifactId>
+			<version>${ilastik4j.version}</version>
+		</dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>math.geom2d</groupId>
-			<artifactId>javaGeom</artifactId>
-			<version>0.11.1</version>
-		</dependency>
 	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
 </project>
