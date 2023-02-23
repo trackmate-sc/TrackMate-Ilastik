@@ -84,10 +84,10 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<TrackMate.version>7.9.0</TrackMate.version>
-
 		<ilastik4j.version>1.8.0</ilastik4j.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
+
+		<TrackMate.version>7.10.2</TrackMate.version>
 	</properties>
 
 	<dependencies>
@@ -125,7 +125,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>TrackMate</artifactId>
-			<version>7.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>math.geom2d</groupId>
