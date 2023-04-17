@@ -6,7 +6,6 @@
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
 		<version>37.0.0</version>
-		<relativePath />
 	</parent>
 
 	<groupId>sc.fiji</groupId>
