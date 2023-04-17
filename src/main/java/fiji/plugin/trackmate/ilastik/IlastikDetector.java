@@ -26,7 +26,6 @@ import java.io.IOException;
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
@@ -135,11 +134,6 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 		if ( null == img )
 		{
 			errorMessage = baseErrorMessage + "Image is null.";
-			return false;
-		}
-		if ( img.dimensionIndex( Axes.Z ) >= 0 )
-		{
-			errorMessage = baseErrorMessage + "Image must be 2D over time, got and image with multiple Z.";
 			return false;
 		}
 		return true;

@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -72,7 +72,7 @@ public class IlastikRunner
 	/**
 	 * Executes the ilastik process on the specified image and return the
 	 * results as a {@link SpotCollection}.
-	 * 
+	 *
 	 * @param img
 	 *            the source image.
 	 * @param interval
@@ -213,37 +213,16 @@ public class IlastikRunner
 		final int t0 = extendedInterval.numDimensions() > 2 ? ( int ) extendedInterval.min( 2 ) : 0;
 		for ( int t = 0; t < proba.dimension( timeIndex ); t++ )
 		{
-			final List< Spot > spotsThisFrame;
 			final ImgPlus< T > probaThisFrame = TMUtils.hyperSlice( proba, 0, t );
-
-			if ( DetectionUtils.is2D( probaThisFrame ) )
-			{
-				/*
-				 * 2D: we compute and store the contour.
-				 */
-				final boolean simplify = true;
-				spotsThisFrame = MaskUtils.fromThresholdWithROI(
-						probaThisFrame,
-						probaThisFrame,
-						calibration,
-						probaThreshold,
-						simplify,
-						numThreads,
-						probaThisFrame );
-			}
-			else
-			{
-				/*
-				 * 3D: We create spots of the same volume that of the region.
-				 */
-				spotsThisFrame = MaskUtils.fromThreshold(
-						probaThisFrame,
-						probaThisFrame,
-						calibration,
-						probaThreshold,
-						numThreads,
-						probaThisFrame );
-			}
+			final boolean simplify = true;
+			final List< Spot > spotsThisFrame = MaskUtils.fromThresholdWithROI(
+					probaThisFrame,
+					probaThisFrame,
+					calibration,
+					probaThreshold,
+					simplify,
+					numThreads,
+					probaThisFrame );
 
 			/*
 			 * Shift the spots (before this step, they have the top-left corner
@@ -267,7 +246,7 @@ public class IlastikRunner
 
 	/**
 	 * Return 1-channel, all time-points, all-Zs if any.
-	 * 
+	 *
 	 * @return an {@link ImgPlus}.
 	 */
 	private static < T extends Type< T > > ImgPlus< T > prepareImg( final ImgPlus< T > img, final int channel )
