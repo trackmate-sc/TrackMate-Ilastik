@@ -292,6 +292,12 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	}
 
 	@Override
+	public boolean has3Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
 	public IlastikDetectorFactory< T > copy()
 	{
 		return new IlastikDetectorFactory<>();
