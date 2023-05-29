@@ -253,8 +253,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 				.settings( settings )
 				.detectorFactory( getDetectorFactory() )
 				.detectionSettingsSupplier( () -> getSettings() )
-				.thresholdTextField( ftfProbaThreshold )
-				.thresholdKey( IlastikDetectorFactory.KEY_PROBA_THRESHOLD )
 				.get();
 		
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
