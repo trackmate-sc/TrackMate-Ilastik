@@ -253,6 +253,8 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 				.settings( settings )
 				.detectorFactory( getDetectorFactory() )
 				.detectionSettingsSupplier( () -> getSettings() )
+				.frameSupplier( () -> settings.imp.getFrame() - 1 )
+				.axisLabel( "Probability" )
 				.get();
 		
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
