@@ -23,22 +23,22 @@ package fiji.plugin.trackmate;
 
 import java.io.IOException;
 
-import net.imagej.ImageJ;
-
 public class TrackMateIlastikTestDrive
 {
 
 	public static void main( final String[] args ) throws IOException
 	{
-		final ImageJ ij = new ImageJ();
-		ij.launch( args );
+//		final ImageJ ij = new ImageJ();
+//		ij.launch( args );
 //		final String path = "D:\\Projects\\NVerttiQuintero\\Data\\Series014b.tif";
 //		final String path = "D:\\Projects\\LLeBlanc\\Data\\201125_Proliferation_2C43-PilQmCherry-HupmRhubarb-II4_100X_timestep5min_Stage3_reg.tif";
-		final String path = "/Users/tinevez/Development/TrackMateWS/TrackMate-Ilastik/samples/NeisseriaMeningitidisGrowth.tif";
+//		final String path = "/Users/tinevez/Development/TrackMateWS/TrackMate-Ilastik/samples/NeisseriaMeningitidisGrowth.tif";
+		final String path = "/Users/tinevez/Development/TrackMateWS/TrackMate-Ilastik/samples/NeisseriaMeningitidisGrowth-mini.tif";
 //		"D:/Projects/NVerttiQuintero/Data/Series014b.tif"
 //		final Dataset dataset = ( Dataset ) ij.io().open( path );
 //		ij.ui().show( dataset );
 
+		ij.ImageJ.main( args );
 		new TrackMatePlugIn().run( path );
 	}
 
