@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>35.1.1</version>
+		<version>36.0.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate-Ilastik</artifactId>
-	<version>1.3.3-SNAPSHOT</version>
+	<version>1.4.0-SNAPSHOT</version>
 
 	<name>TrackMate-Ilastik</name>
 	<description>TrackMate detector based on Ilastik.</description>
@@ -84,7 +84,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<ilastik4j.version>1.8.0</ilastik4j.version>
+		<ilastik4j.version>2.0.1</ilastik4j.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
 
 		<TrackMate.version>7.10.2</TrackMate.version>

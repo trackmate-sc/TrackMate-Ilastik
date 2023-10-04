@@ -28,12 +28,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.ilastik.ilastik4ij.executors.AbstractIlastikExecutor.PixelPredictionType;
-import org.ilastik.ilastik4ij.executors.PixelClassification;
 import org.ilastik.ilastik4ij.ui.IlastikOptions;
+import org.ilastik.ilastik4ij.workflow.PixelClassificationCommand;
+import org.ilastik.ilastik4ij.workflow.WorkflowCommand;
 import org.scijava.Context;
-import org.scijava.app.StatusService;
-import org.scijava.log.LogService;
 import org.scijava.options.OptionsService;
 
 import com.google.gson.Gson;
@@ -52,6 +50,7 @@ import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.MaskUtils;
 import fiji.plugin.trackmate.util.TMUtils;
+import net.imagej.DefaultDataset;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.ops.MetadataUtil;
@@ -169,8 +168,6 @@ public class IlastikRunner
 			extendedInterval = interval;
 		}
 
-		final LogService logService = context.getService( LogService.class );
-		final StatusService statusService = context.getService( StatusService.class );
 		final OptionsService optionService = context.getService( OptionsService.class );
 
 		/*
@@ -188,25 +185,22 @@ public class IlastikRunner
 		 */
 
 		final IlastikOptions ilastikOptions = optionService.getOptions( IlastikOptions.class );
-		final File executableFilePath = ilastikOptions.getExecutableFile();
-		final int numThreads = ilastikOptions.getNumThreads() < 0 ? Runtime.getRuntime().availableProcessors() : ilastikOptions.getNumThreads();
-		final int maxRamMb = ilastikOptions.getMaxRamMb();
+		final int numThreads = ilastikOptions.numThreads <= 0 ? Runtime.getRuntime().availableProcessors()
+				: ilastikOptions.numThreads;
 
 		/*
 		 * Run Ilastik.
 		 */
 
 		final File projectFile = new File( projectFilePath );
-		final PixelClassification classifier = new PixelClassification(
-				executableFilePath,
-				projectFile,
-				logService,
-				statusService,
-				numThreads,
-				maxRamMb );
-		final PixelPredictionType predictionType = PixelPredictionType.Probabilities;
+		PixelClassificationCommand< T > classifier = new PixelClassificationCommand<>();
+		classifier.setContext( context );
+		classifier.projectFileName = projectFile;
+		classifier.pixelClassificationType = WorkflowCommand.ROLE_PROBABILITIES;
+		classifier.inputImage = new DefaultDataset( context, cropped );
+		classifier.run();
 
-		final ImgPlus< T > output = classifier.classifyPixels( cropped, predictionType );
+		final ImgPlus< T > output = classifier.predictions;
 		final ImgPlus< T > proba = ImgPlusViews.hyperSlice( output, output.dimensionIndex( Axes.CHANNEL ), classId );
 
 		/*
@@ -334,7 +328,9 @@ public class IlastikRunner
 	{
 
 		@Override
-		public Map< String, List< Map< String, String > > > deserialize( final JsonElement json, final java.lang.reflect.Type typeOfT, final JsonDeserializationContext context ) throws JsonParseException
+		public Map< String, List< Map< String, String > > > deserialize( final JsonElement json,
+				final java.lang.reflect.Type typeOfT, final JsonDeserializationContext context )
+				throws JsonParseException
 		{
 			final JsonObject obj = json.getAsJsonObject();
 			final JsonElement str = obj.get( AXES_KEY );
