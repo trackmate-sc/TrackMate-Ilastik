@@ -11,7 +11,7 @@
 
 	<groupId>sc.fiji</groupId>
 	<artifactId>TrackMate-Ilastik</artifactId>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>1.4.0</version>
 
 	<name>TrackMate-Ilastik</name>
 	<description>TrackMate detector based on Ilastik.</description>
@@ -63,7 +63,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/trackmate-sc/TrackMate-Ilastik</connection>
 		<developerConnection>scm:git:git@github.com:trackmate-sc/TrackMate-Ilastik</developerConnection>
-		<tag>HEAD</tag>
+		<tag>TrackMate-Ilastik-1.4.0</tag>
 		<url>https://github.com/trackmate-sc/TrackMate-Ilastik</url>
 	</scm>
 	<issueManagement>
