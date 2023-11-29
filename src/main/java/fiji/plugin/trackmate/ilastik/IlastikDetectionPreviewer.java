@@ -38,7 +38,6 @@ import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.Spot;
 import fiji.plugin.trackmate.SpotCollection;
-import fiji.plugin.trackmate.detection.DetectionUtils;
 import fiji.plugin.trackmate.detection.SpotDetectorFactoryBase;
 import fiji.plugin.trackmate.features.FeatureFilter;
 import fiji.plugin.trackmate.io.IOUtils;
@@ -111,23 +110,38 @@ public class IlastikDetectionPreviewer< T extends RealType< T > & NativeType< T 
 		final Logger logger = getLogger();
 
 		/*
-		 * Unwrap settings.
+		 * Source image (all time-points, possible multi-channels.
 		 */
-
-		final Map< String, Object > dsettings = new HashMap<>( detectorSettings );
 		final ImgPlus< T > img = TMUtils.rawWraps( settings.imp );
-		final int channel = ( Integer ) dsettings.get( KEY_TARGET_CHANNEL ) - 1;
-		final ImgPlus< T > input = TMUtils.hyperSlice( img, channel, frame );
-		final int classIndex = ( Integer ) dsettings.get( KEY_CLASS_INDEX );
-		final double probaThreshold = ( Double ) dsettings.get( KEY_PROBA_THRESHOLD );
-		final boolean simplify = true;
-		final Object smoothingObj = dsettings.get( KEY_SMOOTHING_SCALE );
+
+		/*
+		 * Unwrap detector settings.
+		 */
+		final Map< String, Object > dSettings = new HashMap<>( detectorSettings );
+		final String classifierPath = ( String ) dSettings.get( KEY_CLASSIFIER_FILEPATH );
+		final int classIndex = ( Integer ) dSettings.get( KEY_CLASS_INDEX );
+		final double probaThreshold = ( Double ) dSettings.get( KEY_PROBA_THRESHOLD );
+		// In ImgLib2, dimensions are 0-based.
+		final int channel = ( Integer ) dSettings.get( KEY_TARGET_CHANNEL ) - 1;
+		final Object smoothingObj = dSettings.get( KEY_SMOOTHING_SCALE );
 		final double smoothingScale = smoothingObj == null
 				? -1.
 				: ( ( Number ) smoothingObj ).doubleValue();
 
-		// First test to make sure we can read the classifier file.
-		final Object obj = dsettings.get( KEY_CLASSIFIER_FILEPATH );
+		/*
+		 * Interval with one time-frame.
+		 */
+		final Settings lSettings = new Settings( settings.imp );
+		lSettings.tstart = frame;
+		lSettings.tend = frame;
+		lSettings.zstart = settings.zstart;
+		lSettings.zend = settings.zend;
+		final Interval interval = TMUtils.getIntervalWithTime( img, lSettings );
+
+		/*
+		 * First test to make sure we can read the classifier file.
+		 */
+		final Object obj = dSettings.get( KEY_CLASSIFIER_FILEPATH );
 		if ( obj == null )
 		{
 			logger.error( "The path to the ilastik project file is not set." );
@@ -145,7 +159,6 @@ public class IlastikDetectionPreviewer< T extends RealType< T > & NativeType< T 
 		/*
 		 * Shall we recompute probabilities?
 		 */
-
 		boolean recomputeProba = false;
 		if ( settings.imp != previousImp )
 			recomputeProba = true;
@@ -175,13 +188,13 @@ public class IlastikDetectionPreviewer< T extends RealType< T > & NativeType< T 
 			recomputeProba = true;
 		previousChannel = channel;
 
+		/*
+		 * Recompute probabilities.
+		 */
 		if ( recomputeProba || ilastikRunner == null )
 		{
-			logger.log( "Recomputing probabilities." );
-			ilastikRunner = new IlastikRunner<>( classifierFilePath );
-			ilastikRunner.setNumThreads();
-			final Interval interval = DetectionUtils.squeeze( TMUtils.getInterval( img, settings ) );
-			final RandomAccessibleInterval< T > probabilities = ilastikRunner.computeProbabilities( input, channel, interval, classIndex );
+			ilastikRunner = new IlastikRunner<>( classifierPath );
+			final RandomAccessibleInterval< T > probabilities = ilastikRunner.computeProbabilities( img, channel, interval, classIndex );
 			if ( probabilities == null )
 			{
 				logger.error( "Problem computing probabilities: " + ilastikRunner.getErrorMessage() );
@@ -189,41 +202,53 @@ public class IlastikDetectionPreviewer< T extends RealType< T > & NativeType< T 
 			}
 		}
 
+		/*
+		 * Create spots from probabilities.
+		 */
 		logger.log( "Creating spots from probabilities." );
+		final boolean simplify = true;
 		final SpotCollection sc = ilastikRunner.getSpotsFromLastProbabilities( probaThreshold, simplify, smoothingScale );
 		if ( sc == null )
 		{
 			logger.error( "Problem creating spots: " + ilastikRunner.getErrorMessage() );
 			return null;
 		}
-		/*
-		 * Copy spots we got on frame 0 of the 1-time frame image to the output
-		 * at the right frame.
-		 */
-		final List< Spot > spots = new ArrayList<>();
-		sc.iterable( 0, false ).forEach( spots::add );
 
-		List< Spot > prunedSpots;
-		final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+		/*
+		 * Possible prune spots.
+		 */
+		final SpotCollection spots;
 		final Roi roi = settings.getRoi();
 		if ( roi != null )
 		{
-			prunedSpots = new ArrayList<>();
-			for ( final Spot spot : spots )
+			spots = new SpotCollection();
+			final double[] calibration = TMUtils.getSpatialCalibration( settings.imp );
+			for ( int t = settings.tstart; t <= settings.tend; t++ )
 			{
-				if ( roi.contains(
-						( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
-						( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
-					prunedSpots.add( spot );
+				final List< Spot > spotsThisFrame = new ArrayList<>();
+				final Iterable< Spot > spotsIt = sc.iterable( t, false );
+				if ( spotsIt == null )
+					continue;
+
+				for ( final Spot spot : spotsIt )
+				{
+					if ( roi.contains(
+							( int ) Math.round( spot.getFeature( Spot.POSITION_X ) / calibration[ 0 ] ),
+							( int ) Math.round( spot.getFeature( Spot.POSITION_Y ) / calibration[ 1 ] ) ) )
+					{
+						spotsThisFrame.add( spot );
+					}
+				}
+				spots.put( t, spotsThisFrame );
 			}
 		}
 		else
 		{
-			prunedSpots = spots;
+			spots = sc;
 		}
 
 		final Model model = new Model();
-		model.getSpots().put( frame, prunedSpots );
+		model.setSpots( spots, false );
 		model.getSpots().filter( new FeatureFilter( Spot.QUALITY, probaThreshold, true ) );
 
 		return new ValuePair< Model, Double >( model, Double.NaN );
