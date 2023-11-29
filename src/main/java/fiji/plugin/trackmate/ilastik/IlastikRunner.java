@@ -205,7 +205,7 @@ public class IlastikRunner< T extends RealType< T > & NativeType< T > > implemen
 		final ImgPlus< T > output = classifier.predictions;
 		ImgPlus< T > proba = ImgPlusViews.hyperSlice( output, output.dimensionIndex( Axes.CHANNEL ), classId );
 
-		// Do we have an unwarrented Z dim that was added?
+		// Do we have an unwarranted Z dim that was added?
 		final int zIndex = proba.dimensionIndex( Axes.Z );
 		if ( DetectionUtils.is2D( img ) && zIndex >= 0 )
 			proba = ImgPlusViews.hyperSlice( proba, zIndex, 0 );
@@ -239,9 +239,12 @@ public class IlastikRunner< T extends RealType< T > & NativeType< T > > implemen
 
 	public SpotCollection getSpots( final ImgPlus< T > proba, final double[] calibration, final double threshold, final boolean simplify, final double smoothingScale )
 	{
+		// What was the time origin of the input?
+		// Time is always the last dim in the interval.
+		final int t0 = ( int ) lastExtendedInterval.min( lastExtendedInterval.numDimensions() - 1 );
+
 		final SpotCollection spots = new SpotCollection();
 		final int timeIndex = proba.dimensionIndex( Axes.TIME );
-		final int t0 = proba.numDimensions() > 2 ? ( int ) proba.min( 2 ) : 0;
 		for ( int t = 0; t < proba.dimension( timeIndex ); t++ )
 		{
 			final ImgPlus< T > probaThisFrame = TMUtils.hyperSlice( proba, 0, t );
