@@ -109,7 +109,8 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 		{
 			final IlastikRunner< T > runner = new IlastikRunner<>( classifierPath );
 			runner.computeProbabilities( img, channel, interval, classIndex );
-			spots = runner.getSpotsFromLastProbabilities( probaThreshold, true, smoothingScale );
+			final boolean simplify = true;
+			spots = runner.getSpotsFromLastProbabilities( probaThreshold, simplify, smoothingScale );
 		}
 		catch ( final UncheckedIOException e )
 		{
