@@ -21,7 +21,7 @@
  */
 package fiji.plugin.trackmate.ilastik;
 
-import java.io.IOException;
+import java.io.UncheckedIOException;
 
 import fiji.plugin.trackmate.SpotCollection;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
@@ -45,6 +45,10 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 
 	protected final double probaThreshold;
 
+	protected final double smoothingScale;
+
+	private final int channel;
+
 	protected String baseErrorMessage;
 
 	protected String errorMessage;
@@ -53,7 +57,7 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 
 	protected SpotCollection spots;
 
-	private final int channel;
+
 
 	/**
 	 * Instantiate an ilastik detector.
@@ -79,7 +83,8 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 			final int channel,
 			final String classifierPath,
 			final int classIndex,
-			final double probaThreshold )
+			final double probaThreshold,
+			final double smoothingScale )
 	{
 		this.img = img;
 		this.interval = interval;
@@ -87,6 +92,7 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 		this.classifierPath = classifierPath;
 		this.classIndex = classIndex;
 		this.probaThreshold = probaThreshold;
+		this.smoothingScale = smoothingScale;
 		this.baseErrorMessage = BASE_ERROR_MESSAGE;
 	}
 
@@ -101,15 +107,11 @@ public class IlastikDetector< T extends RealType< T > & NativeType< T > > implem
 		
 		try
 		{
-			spots = IlastikRunner.run(
-					img,
-					interval,
-					channel,
-					classifierPath,
-					classIndex,
-					probaThreshold );
+			final IlastikRunner< T > runner = new IlastikRunner<>( classifierPath );
+			runner.computeProbabilities( img, channel, interval, classIndex );
+			spots = runner.getSpotsFromLastProbabilities( probaThreshold, true, smoothingScale );
 		}
-		catch ( final IOException e )
+		catch ( final UncheckedIOException e )
 		{
 			errorMessage = BASE_ERROR_MESSAGE + "Problem accessing the Ilastik executable or the project file:\n" + e.getMessage();
 			e.printStackTrace();

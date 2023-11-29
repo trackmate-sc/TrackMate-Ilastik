@@ -23,6 +23,7 @@ package fiji.plugin.trackmate.ilastik;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 import static fiji.plugin.trackmate.io.IOUtils.readDoubleAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readIntegerAttribute;
 import static fiji.plugin.trackmate.io.IOUtils.readStringAttribute;
@@ -137,6 +138,10 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 		final double probaThreshold = ( Double ) settings.get( KEY_PROBA_THRESHOLD );
 		// In ImgLib2, dimensions are 0-based.
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
+		final Object smoothingObj = settings.get( KEY_SMOOTHING_SCALE );
+		final double smoothingScale = smoothingObj == null
+				? -1.
+				: ( ( Number ) smoothingObj ).doubleValue();
 
 		final IlastikDetector< T > detector = new IlastikDetector<>(
 				img,
@@ -144,7 +149,8 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 				channel,
 				classifierPath,
 				classIndex,
-				probaThreshold );
+				probaThreshold,
+				smoothingScale );
 		return detector;
 	}
 
