@@ -25,6 +25,7 @@ import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.gui.Fonts.BIG_FONT;
 import static fiji.plugin.trackmate.gui.Fonts.FONT;
 import static fiji.plugin.trackmate.gui.Fonts.SMALL_FONT;
+import static fiji.plugin.trackmate.gui.Icons.MAGNIFIER_ICON;
 import static fiji.plugin.trackmate.ilastik.IlastikDetectorFactory.KEY_CLASSIFIER_FILEPATH;
 import static fiji.plugin.trackmate.ilastik.IlastikDetectorFactory.KEY_CLASS_INDEX;
 import static fiji.plugin.trackmate.ilastik.IlastikDetectorFactory.KEY_PROBA_THRESHOLD;
@@ -58,10 +59,10 @@ import org.scijava.prefs.PrefService;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.GuiUtils;
-import fiji.plugin.trackmate.util.DetectionPreview;
 import fiji.plugin.trackmate.util.FileChooser;
 import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.TMUtils;
+import ij.ImagePlus;
 
 public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfigurationPanel
 {
@@ -86,6 +87,8 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	private final JSpinner spinner;
 
+	private final IlastikDetectionPreviewer< ? > previewer;
+
 	/**
 	 * Creates the panel.
 	 * 
@@ -101,7 +104,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 144, 0, 32 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 27, 0, 0, 0, 0, 37, 23 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 27, 0, 0, 0, 0, 0, 37, 23 };
 		gridBagLayout.columnWeights = new double[] { 0., 1., 0. };
 		gridBagLayout.rowWeights = new double[] { 0., 1., 0., 0., 0., 0., 0., 0., 0., 0. };
 		setLayout( gridBagLayout );
@@ -245,25 +248,37 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		add( ftfProbaThreshold, gbcScore );
 
 		/*
+		 * View last proba.
+		 */
+
+		final JButton btnLastProba = new JButton( "Last proba map", MAGNIFIER_ICON );
+		btnLastProba.addActionListener( e -> showProbaImg() );
+		btnLastProba.setFont( FONT );
+		final GridBagConstraints gbcBtnLastProba = new GridBagConstraints();
+		gbcBtnLastProba.gridwidth = 2;
+		gbcBtnLastProba.anchor = GridBagConstraints.SOUTHEAST;
+		gbcBtnLastProba.insets = new Insets( 5, 5, 5, 5 );
+		gbcBtnLastProba.gridx = 1;
+		gbcBtnLastProba.gridy = 7;
+		add( btnLastProba, gbcBtnLastProba );
+
+		/*
 		 * Preview.
 		 */
 
-		final DetectionPreview detectionPreview = DetectionPreview.create()
-				.model( model )
-				.settings( settings )
-				.detectorFactory( getDetectorFactory() )
-				.detectionSettingsSupplier( () -> getSettings() )
-				.frameSupplier( () -> settings.imp.getFrame() - 1 )
-				.axisLabel( "Probability" )
-				.get();
+		previewer = new IlastikDetectionPreviewer<>(
+				model,
+				settings,
+				() -> getSettings(),
+				() -> ( settings.imp.getFrame() - 1 ) );
 		
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.gridwidth = 3;
 		gbcBtnPreview.fill = GridBagConstraints.BOTH;
 		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
 		gbcBtnPreview.gridx = 0;
-		gbcBtnPreview.gridy = 8;
-		add( detectionPreview.getPanel(), gbcBtnPreview );
+		gbcBtnPreview.gridy = 9;
+		add( previewer.getPanel(), gbcBtnPreview );
 
 		/*
 		 * Deal with channels: the slider and channel labels are only visible if
@@ -362,6 +377,12 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		{
 			btnBrowse.setEnabled( true );
 		}
+	}
+
+	private void showProbaImg()
+	{
+		final ImagePlus proba = previewer.getLastProbabilityImage();
+		proba.show();
 	}
 
 	private void refreshLabelNames()
