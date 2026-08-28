@@ -40,15 +40,15 @@ public class TrackMateIlastikTestDrive
 	{
 		GuiUtils.setSystemLookAndFeel();
 
-		final File root = new File( "/Users/tinevez/Google Drive/Cours/Gothenburg-CCI-course-Sept2023/GothenburgCCICourse-Day4-datasets/IlastikTutorialMaterial" );
+		final File root = new File( "/Users/tinevez/Library/CloudStorage/GoogleDrive-jeanyves.tinevez@gmail.com/My Drive/Cours/Gothenburg-CCI-course-Sept2024/GothenburgCCICourse-Day4-datasets/IlastikTutorialMaterial" );
 
 		// 2D+T
-		final String imageName = "2DFocalAdhesion/MDA231 Paxillin DMSO 01.tif";
-		final String classifierName = "2DFocalAdhesion/2DFocalAdhesion.ilp";
+//		final String imageName = "2DFocalAdhesion/MDA231 Paxillin DMSO 01.tif";
+//		final String classifierName = "2DFocalAdhesion/2DFocalAdhesion.ilp";
 
 		// 3D.
-//		final String imageName = "3DEmbryo/CelegansEmbryo.tif";
-//		final String classifierName = "3DEmbryo/3DEmbryo.ilp";
+		final String imageName = "3DEmbryo/CelegansEmbryo.tif";
+		final String classifierName = "3DEmbryo/3DEmbryo.ilp";
 
 		final String imagePath = new File(root, imageName).getAbsolutePath();
 		final String classifierPath = new File(root, classifierName).getAbsolutePath();
