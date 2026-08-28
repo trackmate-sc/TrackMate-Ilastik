@@ -32,8 +32,8 @@ import fiji.plugin.trackmate.detection.DetectorKeys;
 import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.ilastik.IlastikDetectorFactory;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
-import net.imagej.ImageJ;
 
 public class TrackMateIlastikScript
 {
@@ -42,8 +42,7 @@ public class TrackMateIlastikScript
 	{
 		Locale.setDefault( Locale.ROOT );
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-		final ImageJ ij = new ImageJ();
-		ij.launch( args );
+		ImageJ.main( args );
 
 //		final String imagePath = "D:/Projects/NVerttiQuintero/Data/Series014b.tif";
 		final String imagePath = "D:/Projects/NVerttiQuintero/Data/Series063a.tif";
