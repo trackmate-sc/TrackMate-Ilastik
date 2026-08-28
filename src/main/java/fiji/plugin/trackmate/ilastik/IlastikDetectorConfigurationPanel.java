@@ -104,7 +104,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 144, 0, 32 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 27, 0, 0, 0, 0, 0, 37, 23 };
 		gridBagLayout.columnWeights = new double[] { 0., 1., 0. };
 		setLayout( gridBagLayout );
 
@@ -288,6 +287,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gbcBtnPreview.insets = new Insets( 5, 5, 5, 5 );
 		gbcBtnPreview.gridx = 0;
 		gbcBtnPreview.gridy = 10;
+		gbcBtnPreview.weighty = 1.;
 		add( previewer.getPanel(), gbcBtnPreview );
 
 		/*
