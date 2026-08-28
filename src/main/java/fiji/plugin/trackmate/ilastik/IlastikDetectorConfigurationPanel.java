@@ -2,18 +2,18 @@
  * #%L
  * TrackMate: your buddy for everyday tracking.
  * %%
- * Copyright (C) 2020 - 2023 TrackMate developers.
+ * Copyright (C) 2020 - 2025 TrackMate developers.
  * %%
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -91,7 +91,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 
 	/**
 	 * Creates the panel.
-	 * 
+	 *
 	 * @param settings
 	 *            the TrackMate settings to use.
 	 * @param model
@@ -106,7 +106,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gridBagLayout.columnWidths = new int[] { 144, 0, 32 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 27, 0, 0, 0, 0, 0, 37, 23 };
 		gridBagLayout.columnWeights = new double[] { 0., 1., 0. };
-		gridBagLayout.rowWeights = new double[] { 0., 1., 0., 0., 0., 0., 0., 0., 0., 0. };
 		setLayout( gridBagLayout );
 
 		final JLabel lblDetector = new JLabel( TITLE, ICON, JLabel.RIGHT );
@@ -130,7 +129,14 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 		gbcLblHelptext.insets = new Insets( 5, 10, 5, 10 );
 		gbcLblHelptext.gridx = 0;
 		gbcLblHelptext.gridy = 1;
-		add( GuiUtils.textInScrollPanel( GuiUtils.infoDisplay( IlastikDetectorFactory.INFO_TEXT ) ), gbcLblHelptext );
+		gbcLblHelptext.weighty = 1.;
+		add( GuiUtils.textInScrollPanel( GuiUtils.infoDisplay(
+				IlastikDetectorFactory.INFO_TEXT.replace( "</html>", "" )
+						+ "<p>Documentation online: <br/> <a href='"
+						+ IlastikDetectorFactory.DOC_URL + "'>"
+						+ IlastikDetectorFactory.DOC_URL
+						+ "</a></html>" ) ),
+				gbcLblHelptext );
 
 		/*
 		 * Channel selector.
@@ -275,7 +281,7 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 				settings,
 				() -> getSettings(),
 				() -> ( settings.imp.getFrame() - 1 ) );
-		
+
 		final GridBagConstraints gbcBtnPreview = new GridBagConstraints();
 		gbcBtnPreview.gridwidth = 3;
 		gbcBtnPreview.fill = GridBagConstraints.BOTH;
