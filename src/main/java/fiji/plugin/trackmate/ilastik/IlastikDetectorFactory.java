@@ -165,7 +165,7 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	@Override
 	public ImageIcon getIcon()
 	{
-		return IlastikDetectorBaseConfigurationPanel.ICON;
+		return IlastikDetectorConfigurationPanel.ICON;
 	}
 
 	@Override

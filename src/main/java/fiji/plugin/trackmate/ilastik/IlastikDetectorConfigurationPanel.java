@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
@@ -56,6 +57,7 @@ import org.scijava.prefs.PrefService;
 import fiji.plugin.trackmate.Model;
 import fiji.plugin.trackmate.Settings;
 import fiji.plugin.trackmate.gui.GuiUtils;
+import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
 import fiji.plugin.trackmate.gui.components.PanelProbaThreshold;
 import fiji.plugin.trackmate.gui.components.PanelSmoothContour;
 import fiji.plugin.trackmate.util.FileChooser;
@@ -63,7 +65,7 @@ import fiji.plugin.trackmate.util.FileChooser.DialogType;
 import fiji.plugin.trackmate.util.TMUtils;
 import ij.ImagePlus;
 
-public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfigurationPanel
+public class IlastikDetectorConfigurationPanel extends ConfigurationPanel
 {
 
 	private static final long serialVersionUID = 1L;
@@ -71,6 +73,14 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	private static final String TITLE = IlastikDetectorFactory.NAME;
 
 	private static final FileFilter fileFilter = new FileNameExtensionFilter( "ilastik project files.", "ilp" );
+
+	public static final ImageIcon ICON;
+
+	static
+	{
+		final ImageIcon c = new ImageIcon( GuiUtils.getResource( "images/TrackMate-Ilastik-logo-32px.png", IlastikDetectorConfigurationPanel.class ) );
+		ICON = GuiUtils.scaleImage( c, 64, 64 );
+	}
 
 	private final JSlider sliderChannel;
 
@@ -99,7 +109,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	 */
 	public IlastikDetectorConfigurationPanel( final Settings settings, final Model model )
 	{
-		super( settings, model );
 		this.prefService = TMUtils.getContext().getService( PrefService.class );
 
 		final GridBagLayout gridBagLayout = new GridBagLayout();
@@ -371,13 +380,6 @@ public class IlastikDetectorConfigurationPanel extends IlastikDetectorBaseConfig
 	@Override
 	public void clean()
 	{}
-
-	@Override
-	@SuppressWarnings( "rawtypes" )
-	protected IlastikDetectorFactory< ? > getDetectorFactory()
-	{
-		return new IlastikDetectorFactory();
-	}
 
 	protected void browse()
 	{
