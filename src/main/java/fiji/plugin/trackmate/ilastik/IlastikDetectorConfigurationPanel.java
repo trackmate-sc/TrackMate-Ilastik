@@ -74,13 +74,7 @@ public class IlastikDetectorConfigurationPanel extends ConfigurationPanel
 
 	private static final FileFilter fileFilter = new FileNameExtensionFilter( "ilastik project files.", "ilp" );
 
-	public static final ImageIcon ICON;
-
-	static
-	{
-		final ImageIcon c = new ImageIcon( GuiUtils.getResource( "images/TrackMate-Ilastik-logo-32px.png", IlastikDetectorConfigurationPanel.class ) );
-		ICON = GuiUtils.scaleImage( c, 64, 64 );
-	}
+	public static final ImageIcon ICON = new ImageIcon( GuiUtils.getResource( "images/TrackMate-Ilastik-logo-64px.png", IlastikDetectorConfigurationPanel.class ) );
 
 	private final JSlider sliderChannel;
 
@@ -97,7 +91,6 @@ public class IlastikDetectorConfigurationPanel extends ConfigurationPanel
 	private final JSpinner spinner;
 
 	private final IlastikDetectionPreviewer< ? > previewer;
-
 
 	/**
 	 * Creates the panel.
