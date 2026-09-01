@@ -5,8 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>43.0.0</version>
-		<relativePath />
+		<version>45.1.0</version>
 	</parent>
 
 	<groupId>sc.fiji</groupId>
@@ -87,41 +86,10 @@
 		<ilastik4j.version>2.0.3</ilastik4j.version>
 		<javaGeom.version>0.11.1</javaGeom.version>
 
-		<TrackMate.version>8.0.0</TrackMate.version>
+		<TrackMate.version>9.0.0-SNAPSHOT</TrackMate.version>
 	</properties>
 
 	<dependencies>
-		<!-- ImageJ dependencies -->
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>ij</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej-deprecated</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej</artifactId>
-		</dependency>
-
-		<!-- ImgLib2 dependencies -->
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ij</artifactId>
-		</dependency>
-
-		<!-- SciJava dependencies -->
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-common</artifactId>
-		</dependency>
-
-		<!-- Other dependencies -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>TrackMate</artifactId>

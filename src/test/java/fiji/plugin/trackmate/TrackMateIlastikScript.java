@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -29,12 +29,11 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import fiji.plugin.trackmate.detection.DetectorKeys;
-import fiji.plugin.trackmate.gui.displaysettings.DisplaySettingsIO;
+import fiji.plugin.trackmate.gui.GuiModel;
 import fiji.plugin.trackmate.ilastik.IlastikDetectorFactory;
-import fiji.plugin.trackmate.visualization.hyperstack.HyperStackDisplayer;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
-import net.imagej.ImageJ;
 
 public class TrackMateIlastikScript
 {
@@ -43,9 +42,8 @@ public class TrackMateIlastikScript
 	{
 		Locale.setDefault( Locale.ROOT );
 		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-		final ImageJ ij = new ImageJ();
-		ij.launch( args );
-		
+		ImageJ.main( args );
+
 //		final String imagePath = "D:/Projects/NVerttiQuintero/Data/Series014b.tif";
 		final String imagePath = "D:/Projects/NVerttiQuintero/Data/Series063a.tif";
 		final String classifierPath = "D:/Projects/NVerttiQuintero/Ilastik/NVertti.ilp";
@@ -77,16 +75,12 @@ public class TrackMateIlastikScript
 		model.getSpots().setVisible( true );
 		System.out.println( "Detection completed successfully." );
 		System.out.println( model.getSpots().toString() );
-		
-		
 
 		/*
 		 * Display results.
 		 */
 
-		final SelectionModel selectionModel = new SelectionModel( model );
-		final HyperStackDisplayer view = new HyperStackDisplayer( model, selectionModel, imp, DisplaySettingsIO.readUserDefault() );
-		view.render();
-		view.refresh();
+		final GuiModel guiModel = new GuiModel( model, settings );
+		guiModel.getWindowManager().createHyperStackDisplayer();
 	}
 }

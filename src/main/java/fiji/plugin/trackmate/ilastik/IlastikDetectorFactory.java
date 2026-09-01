@@ -8,12 +8,12 @@
  * it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
@@ -23,12 +23,14 @@ package fiji.plugin.trackmate.ilastik;
 
 import static fiji.plugin.trackmate.detection.DetectorKeys.DEFAULT_TARGET_CHANNEL;
 import static fiji.plugin.trackmate.detection.DetectorKeys.KEY_TARGET_CHANNEL;
+import static fiji.plugin.trackmate.detection.ThresholdDetectorFactory.KEY_SMOOTHING_SCALE;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.ImageIcon;
 
+import org.scijava.Priority;
 import org.scijava.plugin.Plugin;
 
 import fiji.plugin.trackmate.Model;
@@ -37,14 +39,12 @@ import fiji.plugin.trackmate.detection.SpotDetectorFactory;
 import fiji.plugin.trackmate.detection.SpotGlobalDetector;
 import fiji.plugin.trackmate.detection.SpotGlobalDetectorFactory;
 import fiji.plugin.trackmate.gui.components.ConfigurationPanel;
-import fiji.plugin.trackmate.io.IOUtils;
-import fiji.plugin.trackmate.util.TMUtils;
 import net.imagej.ImgPlus;
 import net.imglib2.Interval;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.RealType;
 
-@Plugin( type = SpotDetectorFactory.class )
+@Plugin( type = SpotDetectorFactory.class, priority = Priority.LOW - 4. )
 public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > > implements SpotGlobalDetectorFactory< T >
 {
 
@@ -79,7 +79,7 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	public static final String INFO_TEXT = "<html>"
 			+ "This detector relies on ilastik to detect objects."
 			+ "<p>"
-			+ "It only works for 2D images."
+			+ "It works for 2D and 3D images."
 			+ "And for this detector to work, the 'ilastik' update site "
 			+ "must be activated in your Fiji installation. "
 			+ "You also need to properly configure the Ilastik Fiji plugin."
@@ -112,6 +112,10 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 		final double probaThreshold = ( Double ) settings.get( KEY_PROBA_THRESHOLD );
 		// In ImgLib2, dimensions are 0-based.
 		final int channel = ( Integer ) settings.get( KEY_TARGET_CHANNEL ) - 1;
+		final Object smoothingObj = settings.get( KEY_SMOOTHING_SCALE );
+		final double smoothingScale = smoothingObj == null
+				? -1.
+				: ( ( Number ) smoothingObj ).doubleValue();
 
 		final IlastikDetector< T > detector = new IlastikDetector<>(
 				img,
@@ -119,7 +123,8 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 				channel,
 				classifierPath,
 				classIndex,
-				probaThreshold );
+				probaThreshold,
+				smoothingScale );
 		return detector;
 	}
 
@@ -147,26 +152,8 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 		settings.put( KEY_CLASSIFIER_FILEPATH, "" );
 		settings.put( KEY_CLASS_INDEX, DEFAULT_CLASS_INDEX );
 		settings.put( KEY_PROBA_THRESHOLD, DEFAULT_PROBA_THRESHOLD );
+		settings.put( KEY_SMOOTHING_SCALE, -1. );
 		return settings;
-	}
-
-	@Override
-	public String checkSettings( final Map< String, Object > settings )
-	{
-		final String errorMessage = TMUtils.checkSettings( settings, getDefaultSettings() );
-		if ( null != errorMessage )
-			return errorMessage;
-
-		// Extra test to make sure we can read the classifier file.
-		final Object obj = settings.get( KEY_CLASSIFIER_FILEPATH );
-		if ( obj == null )
-			return "The path to the ilastik file is not set.";
-
-		final StringBuilder errorHolder = new StringBuilder();
-		if ( !IOUtils.canReadFile( ( String ) obj, errorHolder ) )
-			return "Problem with ilastik file: " + errorHolder.toString();
-
-		return null;
 	}
 
 	@Override
@@ -178,7 +165,7 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	@Override
 	public ImageIcon getIcon()
 	{
-		return IlastikDetectorBaseConfigurationPanel.ICON;
+		return IlastikDetectorConfigurationPanel.ICON;
 	}
 
 	@Override
@@ -203,5 +190,17 @@ public class IlastikDetectorFactory< T extends RealType< T > & NativeType< T > >
 	public boolean has2Dsegmentation()
 	{
 		return true;
+	}
+
+	@Override
+	public boolean has3Dsegmentation()
+	{
+		return true;
+	}
+
+	@Override
+	public IlastikDetectorFactory< T > copy()
+	{
+		return new IlastikDetectorFactory<>();
 	}
 }
